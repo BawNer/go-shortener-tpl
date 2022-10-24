@@ -5,9 +5,9 @@ import (
 )
 
 type DB struct {
-	Id       int    `json:"id"`
-	Url      string `json:"url"`
-	UrlShort string `json:"urlShort"`
+	ID       int    `json:"id"`
+	URL      string `json:"url"`
+	URLShort string `json:"urlShort"`
 }
 
 var LocalDB []DB
@@ -17,11 +17,11 @@ func SaveDB(payload DB) (DB, []DB) {
 	return payload, LocalDB
 }
 
-func FindById(id int) (DB, error) {
+func FindByID(id int) (DB, error) {
 	result := DB{}
 	var err = errors.New("not found")
 	for _, ldb := range LocalDB {
-		if ldb.Id == id {
+		if ldb.ID == id {
 			result = ldb
 			err = nil
 		} else {
