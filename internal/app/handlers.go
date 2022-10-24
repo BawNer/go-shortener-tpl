@@ -5,16 +5,12 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"regexp"
-	"strconv"
+	"strings"
 	"time"
 )
 
-type postRequest struct {
-	Url string `json:"url"`
-}
-
 func HandlerRequest(w http.ResponseWriter, r *http.Request) {
+	fmt.Println(r.Method)
 	switch r.Method {
 	case "POST":
 		URL, err := io.ReadAll(r.Body)
@@ -24,23 +20,22 @@ func HandlerRequest(w http.ResponseWriter, r *http.Request) {
 		}
 		timestamp := time.Now()
 		shr := base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s %d", string(URL)[2:6], timestamp.Second())))
-		resStruct := DB{len(LocalDB), string(URL), fmt.Sprintf("http://localhost:8080/%s", shr)}
+		resStruct := DB{len(LocalDB), string(URL), shr}
 		SaveDB(resStruct)
 		w.Header().Set("Content-Type", "text/plain")
 		w.WriteHeader(http.StatusCreated)
 		w.Write([]byte(fmt.Sprintf("http://localhost:8080/%s", shr)))
 	case "GET":
-		re, _ := regexp.Compile(`\d`)
-		id, _ := strconv.Atoi(string(re.Find([]byte(r.RequestURI))))
-		w.Header().Set("Content-Type", "text/plain")
+		id := strings.TrimPrefix(r.RequestURI, "/")
 		columns, err := FindByID(id)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusNotFound)
 			return
 		}
+		w.Header().Set("Content-Type", "text/plain")
+		w.Header().Set("Location", columns.URL)
 		w.WriteHeader(http.StatusTemporaryRedirect)
-		w.Header().Set("Location", columns.URLShort)
-		w.Write([]byte(columns.URLShort))
+		w.Write([]byte(fmt.Sprintf("http://localhosy:8080/%s", columns.URLShort)))
 	default:
 		http.Error(w, "Bad Gateway", http.StatusMethodNotAllowed)
 		return
