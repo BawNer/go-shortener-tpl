@@ -31,7 +31,6 @@ func HandlerRequest(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusNotFound)
 			return
 		}
-		w.Header().Set("Content-Type", "text/plain")
 		fmt.Println(columns.URL)
 		w.Header().Set("Location", columns.URL)
 		w.WriteHeader(http.StatusTemporaryRedirect)
