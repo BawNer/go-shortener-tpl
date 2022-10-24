@@ -1,9 +1,9 @@
 package app
 
 import (
-	"crypto/md5"
 	"encoding/hex"
 	"fmt"
+	"github.com/google/uuid"
 	"io"
 	"net/http"
 	"strings"
@@ -17,8 +17,7 @@ func HandlerRequest(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
-		hash := md5.New()
-		shr := hash.Sum(URL)
+		shr := uuid.New().NodeID()
 		resStruct := DB{len(LocalDB), string(URL), hex.EncodeToString(shr)}
 		SaveDB(resStruct)
 		w.Header().Set("Content-Type", "text/plain")
