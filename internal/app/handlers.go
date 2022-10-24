@@ -22,7 +22,7 @@ func HandlerRequest(w http.ResponseWriter, r *http.Request) {
 		SaveDB(resStruct)
 		w.Header().Set("Content-Type", "text/plain")
 		w.WriteHeader(http.StatusCreated)
-		w.Write([]byte(fmt.Sprintf("http://localhost:8080/%s", hex.EncodeToString(shr))))
+		_, _ = w.Write([]byte(fmt.Sprintf("http://localhost:8080/%s", hex.EncodeToString(shr))))
 	case "GET":
 		id := strings.TrimPrefix(r.RequestURI, "/")
 		columns, err := FindByID(id)
