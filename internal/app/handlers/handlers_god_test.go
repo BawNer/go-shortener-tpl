@@ -35,8 +35,14 @@ func TestMemStorage_HandlerRequest(t *testing.T) {
 				t.Errorf("Expect error from request!")
 			}
 			resp, err := http.DefaultClient.Do(request)
+			if err != nil {
+				t.Errorf("Expect error from request!")
+			}
 			defer resp.Body.Close()
 			payload, err := io.ReadAll(resp.Body)
+			if err != nil {
+				t.Errorf("Expect error from read body!")
+			}
 			if resp.Status != tt.wantStatus {
 				t.Errorf("Await status %s, but get status %s", tt.wantStatus, resp.Status)
 			}
