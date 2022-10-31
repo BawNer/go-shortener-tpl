@@ -1,15 +1,20 @@
-package app
+package handlers
 
 import (
 	"encoding/hex"
 	"fmt"
 	"github.com/google/uuid"
+	"go-shortener-tpl/internal/app/storage"
 	"io"
 	"net/http"
 	"strings"
 )
 
-func HandlerRequest(w http.ResponseWriter, r *http.Request) {
+type MemStorage struct {
+	storage.MemStorage
+}
+
+func (m *MemStorage) HandlerRequest(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "POST":
 		URL, err := io.ReadAll(r.Body)
@@ -18,19 +23,18 @@ func HandlerRequest(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		shr := uuid.New().NodeID()
-		resStruct := DB{len(LocalDB), string(URL), hex.EncodeToString(shr)}
-		SaveDB(resStruct)
+		URLShort := hex.EncodeToString(shr)
+		m.SaveDB(storage.DBKey(URLShort), storage.MyDB{ID: len(m.Storage), URL: string(URL), URLShort: URLShort})
 		w.Header().Set("Content-Type", "text/plain")
 		w.WriteHeader(http.StatusCreated)
-		_, _ = w.Write([]byte(fmt.Sprintf("http://localhost:8080/%s", hex.EncodeToString(shr))))
+		_, _ = w.Write([]byte(fmt.Sprintf("http://localhost:8080/%s", URLShort)))
 	case "GET":
 		id := strings.TrimPrefix(r.RequestURI, "/")
-		columns, err := FindByID(id)
+		columns, err := m.FindByID(storage.DBKey(id))
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusNotFound)
 			return
 		}
-		fmt.Println(columns.URL)
 		w.Header().Set("Location", columns.URL)
 		w.WriteHeader(http.StatusTemporaryRedirect)
 	default:
