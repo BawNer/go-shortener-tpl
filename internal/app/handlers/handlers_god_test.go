@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"fmt"
 	"io"
 	"net/http"
 	"testing"
@@ -46,10 +45,9 @@ func TestMemStorage_HandlerRequest(t *testing.T) {
 			if resp.Status != tt.wantStatus {
 				t.Errorf("Await status %s, but get status %s", tt.wantStatus, resp.Status)
 			}
-			if tt.wantBody && resp.Body == nil {
+			if tt.wantBody && payload == nil {
 				t.Errorf("Body is empty, but await body")
 			}
-			fmt.Println(payload)
 		})
 	}
 }
