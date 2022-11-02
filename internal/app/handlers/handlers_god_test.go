@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"github.com/go-chi/chi/v5"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -18,13 +19,13 @@ func TestMemStorage_HandlerRequest(t *testing.T) {
 			name:       "Test POST Method",
 			method:     http.MethodPost,
 			wantStatus: 201,
-			wantBody:   true,
+			wantBody:   false,
 		},
 		{
 			name:       "Test GET Method",
 			method:     http.MethodGet,
-			wantStatus: 404,
-			wantBody:   true,
+			wantStatus: 405,
+			wantBody:   false,
 		},
 	}
 
@@ -33,8 +34,10 @@ func TestMemStorage_HandlerRequest(t *testing.T) {
 			sh := &MemStorage{}
 			request := httptest.NewRequest(tt.method, "http://localhost:8080", nil)
 			w := httptest.NewRecorder()
-			h := http.HandlerFunc(sh.HandlerRequest)
-			h.ServeHTTP(w, request)
+			s := chi.NewRouter()
+			s.Post("/", sh.HandlerPostRequest)
+			s.Get("/{ID}", sh.HandlerGetRequest)
+			s.ServeHTTP(w, request)
 			res := w.Result()
 
 			if res.StatusCode != tt.wantStatus {
@@ -46,7 +49,7 @@ func TestMemStorage_HandlerRequest(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			if !tt.wantBody && resBody != nil {
+			if tt.wantBody && string(resBody) == "" {
 				t.Errorf("Expect body!!!")
 			}
 		})
