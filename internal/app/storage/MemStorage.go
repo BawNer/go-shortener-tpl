@@ -1,6 +1,13 @@
 package storage
 
-import "errors"
+import (
+	"errors"
+	"sync"
+)
+
+var (
+	ErrNotFound = errors.New("not found")
+)
 
 type DBKey string
 
@@ -11,6 +18,7 @@ type MyDB struct {
 }
 
 type MemStorage struct {
+	sync.RWMutex
 	Storage map[DBKey]MyDB
 }
 
@@ -20,6 +28,8 @@ type MemStorageInterface interface {
 }
 
 func (m *MemStorage) SaveDB(k DBKey, d MyDB) MyDB {
+	m.Lock()
+	defer m.Unlock()
 	if m.Storage == nil {
 		m.Storage = map[DBKey]MyDB{}
 	}
@@ -28,13 +38,13 @@ func (m *MemStorage) SaveDB(k DBKey, d MyDB) MyDB {
 }
 
 func (m *MemStorage) FindByID(id DBKey) (MyDB, error) {
+	m.RLock()
+	defer m.RUnlock()
 	result := MyDB{}
-	err := errors.New("not found")
+	err := ErrNotFound
 	for idb := range m.Storage {
 		if idb == id {
-			result = m.Storage[id]
-			err = nil
-			break
+			return m.Storage[id], nil
 		}
 	}
 
