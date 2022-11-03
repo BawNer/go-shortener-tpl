@@ -1,9 +1,11 @@
 package handlers
 
 import (
-	"github.com/go-chi/chi/v5"
-	"go-shortener-tpl/internal/app/storage"
 	"net/http"
+
+	"github.com/BawNer/go-shortener-tpl/internal/app/storage"
+
+	"github.com/go-chi/chi/v5"
 )
 
 type MemStorage struct {
