@@ -18,7 +18,7 @@ type MyDB struct {
 }
 
 type MemStorage struct {
-	sync.RWMutex
+	mu      sync.RWMutex
 	Storage map[DBKey]MyDB
 }
 
@@ -28,8 +28,8 @@ type MemStorageInterface interface {
 }
 
 func (m *MemStorage) SaveDB(k DBKey, d MyDB) MyDB {
-	m.Lock()
-	defer m.Unlock()
+	m.mu.Lock()
+	defer m.mu.Unlock()
 	if m.Storage == nil {
 		m.Storage = map[DBKey]MyDB{}
 	}
@@ -38,15 +38,14 @@ func (m *MemStorage) SaveDB(k DBKey, d MyDB) MyDB {
 }
 
 func (m *MemStorage) FindByID(id DBKey) (MyDB, error) {
-	m.RLock()
-	defer m.RUnlock()
-	result := MyDB{}
-	err := ErrNotFound
-	for idb := range m.Storage {
-		if idb == id {
-			return m.Storage[id], nil
-		}
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+
+	v, ok := m.Storage[id]
+
+	if !ok {
+		return MyDB{}, ErrNotFound
 	}
 
-	return result, err
+	return v, nil
 }
