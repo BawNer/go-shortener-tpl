@@ -1,11 +1,13 @@
 package main
 
 import (
-	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
+	"errors"
 	"go-shortener-tpl/internal/app/handlers"
 	"log"
 	"net/http"
+
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
 )
 
 func main() {
@@ -21,5 +23,10 @@ func main() {
 	r.Get("/{ID}", h.HandlerGetRequest)
 
 	// start server
-	log.Fatal(http.ListenAndServe(":8080", r))
+	err := http.ListenAndServe(":8080", r)
+
+	// catch err
+	if err != nil && !errors.Is(err, http.ErrServerClosed) {
+		log.Fatal(err)
+	}
 }
