@@ -2,9 +2,10 @@ package main
 
 import (
 	"errors"
-	"go-shortener-tpl/internal/app/handlers"
 	"log"
 	"net/http"
+
+	"github.com/BawNer/go-shortener-tpl/internal/app/handlers"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -25,7 +26,7 @@ func main() {
 	// start server
 	err := http.ListenAndServe(":8080", r)
 
-	// catch err
+	// handle err
 	if err != nil && !errors.Is(err, http.ErrServerClosed) {
 		log.Fatal(err)
 	}
