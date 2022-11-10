@@ -1,4 +1,4 @@
-package api
+package handlers
 
 import (
 	"bytes"
@@ -11,10 +11,6 @@ import (
 	"github.com/google/uuid"
 )
 
-type MemStorage struct {
-	storage.MemStorage
-}
-
 type RequestData struct {
 	URL string `json:"url"`
 }
@@ -24,7 +20,6 @@ type ResponseData struct {
 }
 
 func (m *MemStorage) ShortenerHandler(w http.ResponseWriter, r *http.Request) {
-
 	var data RequestData
 
 	if err := json.NewDecoder(r.Body).Decode(&data); err != nil {
@@ -42,7 +37,8 @@ func (m *MemStorage) ShortenerHandler(w http.ResponseWriter, r *http.Request) {
 			URL:      data.URL,
 			URLShort: URLShort,
 		})
-
+	fmt.Println("After save data")
+	fmt.Println(m.FindByID(storage.DBKey(URLShort)))
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 
@@ -56,5 +52,5 @@ func (m *MemStorage) ShortenerHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, _ = w.Write([]byte(buf.String()))
+	_, _ = w.Write(buf.Bytes())
 }
