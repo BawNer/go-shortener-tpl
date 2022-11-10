@@ -8,14 +8,10 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/BawNer/go-shortener-tpl/internal/app/storage"
 	"github.com/go-chi/chi/v5"
 )
 
 func TestMemStorage_ShortenerHandler(t *testing.T) {
-	type fields struct {
-		MemStorage storage.MemStorage
-	}
 
 	type want struct {
 		status int
@@ -34,13 +30,11 @@ func TestMemStorage_ShortenerHandler(t *testing.T) {
 		want   want
 	}
 	tests := []struct {
-		name   string
-		fields fields
-		args   args
+		name string
+		args args
 	}{
 		{
-			name:   "POST REQUEST",
-			fields: fields{},
+			name: "POST REQUEST",
 			args: args{
 				method: http.MethodPost,
 				url:    "http://localhost:8080/api/shorten",
