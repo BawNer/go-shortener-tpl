@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/BawNer/go-shortener-tpl/internal/app/storage"
@@ -15,16 +14,14 @@ type MemStorage struct {
 
 func (m *MemStorage) HandlerGetRequest(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "ID")
-	fmt.Println("ID URL PARAM")
-	fmt.Println(id)
+
 	if id == "" {
 		http.Error(w, "ID is not be empty", http.StatusBadRequest)
 		return
 	}
 
 	columns, err := m.FindByID(storage.DBKey(id))
-	fmt.Println("FIND BY INDEX")
-	fmt.Println(columns)
+
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusNotFound)
 		return

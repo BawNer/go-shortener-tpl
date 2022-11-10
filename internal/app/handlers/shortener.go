@@ -37,8 +37,7 @@ func (m *MemStorage) ShortenerHandler(w http.ResponseWriter, r *http.Request) {
 			URL:      data.URL,
 			URLShort: URLShort,
 		})
-	fmt.Println("After save data")
-	fmt.Println(m.FindByID(storage.DBKey(URLShort)))
+
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 

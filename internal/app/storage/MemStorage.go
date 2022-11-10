@@ -2,7 +2,6 @@ package storage
 
 import (
 	"errors"
-	"fmt"
 	"sync"
 )
 
@@ -34,7 +33,6 @@ func (m *MemStorage) SaveDB(k DBKey, d MyDB) MyDB {
 	if m.Storage == nil {
 		m.Storage = map[DBKey]MyDB{}
 	}
-	fmt.Println(d)
 	m.Storage[k] = d
 	return m.Storage[k]
 }
