@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/BawNer/go-shortener-tpl/internal/app/handlers"
+	"github.com/BawNer/go-shortener-tpl/internal/app/handlers/api"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -13,6 +14,8 @@ import (
 
 func main() {
 	h := &handlers.MemStorage{}
+	apiHandlers := &api.MemStorage{}
+
 	r := chi.NewRouter()
 
 	r.Use(middleware.RequestID)
@@ -22,6 +25,8 @@ func main() {
 
 	r.Post("/", h.HandlerPostRequest)
 	r.Get("/{ID}", h.HandlerGetRequest)
+
+	r.Post("/api/shortener", apiHandlers.ShortenerHandler)
 
 	// start server
 	err := http.ListenAndServe(":8080", r)
