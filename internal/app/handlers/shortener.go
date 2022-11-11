@@ -9,6 +9,7 @@ import (
 
 	"github.com/BawNer/go-shortener-tpl/internal/app/storage"
 	"github.com/google/uuid"
+	"github.com/spf13/viper"
 )
 
 type RequestData struct {
@@ -42,7 +43,7 @@ func (m *MemStorage) ShortenerHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusCreated)
 
 	response := ResponseData{
-		Result: fmt.Sprintf("http://localhost:8080/%s", URLShort),
+		Result: fmt.Sprintf("%s%s", viper.GetString("BASE_URL"), URLShort),
 	}
 
 	buf := bytes.NewBuffer([]byte{})
