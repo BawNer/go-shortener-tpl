@@ -2,23 +2,27 @@ package main
 
 import (
 	"errors"
-	"fmt"
 	"log"
 	"net/http"
 
 	"github.com/BawNer/go-shortener-tpl/internal/app/handlers"
+	"github.com/caarlos0/env/v6"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
-	"github.com/spf13/viper"
 )
 
-func main() {
-	//set env conf viper2
-	viper.SetConfigFile(".env")
-	if err := viper.ReadInConfig(); err != nil { // Handle errors reading the config file
-		panic(fmt.Errorf("fatal error config file: %w", err))
-	}
+type Config struct {
+	ServerAddress string `env:"SERVER_ADDRESS" envDefault:"127.0.0.1:8080"`
+	BaseURL       string `env:"BASE_URL" envDefault:"http://localhost:8080"`
+}
 
+var CFG Config
+
+func main() {
+	//get env config HERE
+	if err := env.Parse(&CFG); err != nil {
+		panic(err)
+	}
 	h := &handlers.MemStorage{}
 
 	r := chi.NewRouter()
@@ -32,10 +36,10 @@ func main() {
 	r.Post("/", h.HandlerPostRequest)
 	r.Get("/{ID}", h.HandlerGetRequest)
 
-	log.Printf("Server started at %s", viper.GetString("SERVER_ADDRESS"))
+	log.Printf("Server started at %s", CFG.ServerAddress)
 
 	// start server
-	err := http.ListenAndServe(viper.GetString("SERVER_ADDRESS"), r)
+	err := http.ListenAndServe(CFG.ServerAddress, r)
 
 	// handle err
 	if err != nil && !errors.Is(err, http.ErrServerClosed) {
