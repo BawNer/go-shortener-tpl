@@ -8,7 +8,6 @@ import (
 	"net/http"
 
 	"github.com/BawNer/go-shortener-tpl/internal/app/storage"
-	"github.com/caarlos0/env/v6"
 	"github.com/google/uuid"
 )
 
@@ -20,17 +19,7 @@ type ResponseData struct {
 	Result string `json:"result"`
 }
 
-type Config struct {
-	ServerAddress string `env:"SERVER_ADDRESS" envDefault:"127.0.0.1:8080"`
-	BaseURL       string `env:"BASE_URL" envDefault:"http://localhost:8080"`
-}
-
-var CFG Config
-
 func (m *MemStorage) ShortenerHandler(w http.ResponseWriter, r *http.Request) {
-	if err := env.Parse(&CFG); err != nil {
-		panic(err)
-	}
 	var data RequestData
 
 	if err := json.NewDecoder(r.Body).Decode(&data); err != nil {
@@ -53,7 +42,7 @@ func (m *MemStorage) ShortenerHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusCreated)
 
 	response := ResponseData{
-		Result: fmt.Sprintf("%s/%s", CFG.BaseURL, URLShort),
+		Result: fmt.Sprintf("%s/%s", "ds", URLShort),
 	}
 
 	buf := bytes.NewBuffer([]byte{})
