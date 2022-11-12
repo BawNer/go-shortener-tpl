@@ -27,6 +27,7 @@ func (m *MemStorage) ShortenerHandler(w http.ResponseWriter, r *http.Request) {
 	cfg := app.Config{
 		ServerAddr: viper.GetString("SERVER_ADDRESS"),
 		BaseURL:    viper.GetString("BASE_URL"),
+		Scheme:     viper.GetString("SCHEME"),
 	}
 
 	cfg = app.NewConfig(cfg)
@@ -53,7 +54,7 @@ func (m *MemStorage) ShortenerHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusCreated)
 
 	response := ResponseData{
-		Result: fmt.Sprintf("%s%s/%s", cfg.ServerAddr, cfg.BaseURL, URLShort),
+		Result: fmt.Sprintf("%s://%s%s/%s", cfg.Scheme, cfg.ServerAddr, cfg.BaseURL, URLShort),
 	}
 
 	buf := bytes.NewBuffer([]byte{})
