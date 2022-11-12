@@ -42,7 +42,7 @@ func (m *MemStorage) ShortenerHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusCreated)
 
 	response := ResponseData{
-		Result: fmt.Sprintf("%s/%s", "ds", URLShort),
+		Result: fmt.Sprintf("%s/%s", "http://localhost:8080", URLShort),
 	}
 
 	buf := bytes.NewBuffer([]byte{})
