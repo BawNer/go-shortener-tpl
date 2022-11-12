@@ -5,43 +5,22 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/BawNer/go-shortener-tpl/internal/app"
 	"github.com/BawNer/go-shortener-tpl/internal/app/handlers"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/spf13/viper"
 )
 
-const (
-	defaultServerAddr = "127.0.0.1:8080"
-	defaultBaseURL    = "http://localhost:8080"
-)
-
-type Config struct {
-	ServerAddr string
-	BaseURL    string
-}
-
-func NewConfig(conf Config) Config {
-	if conf.ServerAddr == "" {
-		conf.ServerAddr = defaultServerAddr
-	}
-
-	if conf.BaseURL == "" {
-		conf.BaseURL = defaultBaseURL
-	}
-
-	return conf
-}
-
 func main() {
 	viper.AutomaticEnv()
 
-	var cfg = Config{
+	cfg := app.Config{
 		ServerAddr: viper.GetString("SERVER_ADDRESS"),
 		BaseURL:    viper.GetString("BASE_URL)"),
 	}
 
-	cfg = NewConfig(cfg)
+	cfg = app.NewConfig(cfg)
 
 	h := &handlers.MemStorage{}
 
