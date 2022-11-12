@@ -1,7 +1,7 @@
 package app
 
 const (
-	defaultServerAddr = "http://127.0.0.1:8080"
+	defaultServerAddr = "http://localhost:8080"
 	defaultBaseURL    = ""
 )
 
