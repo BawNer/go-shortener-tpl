@@ -2,7 +2,7 @@ package app
 
 const (
 	defaultServerAddr = "127.0.0.1:8080"
-	defaultBaseURL    = "http://localhost:8080"
+	defaultBaseURL    = ""
 )
 
 type Config struct {
