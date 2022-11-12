@@ -17,7 +17,7 @@ func main() {
 
 	cfg := app.Config{
 		ServerAddr: viper.GetString("SERVER_ADDRESS"),
-		BaseURL:    viper.GetString("BASE_URL)"),
+		BaseURL:    viper.GetString("BASE_URL"),
 	}
 
 	cfg = app.NewConfig(cfg)
