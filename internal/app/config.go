@@ -10,7 +10,8 @@ type Config struct {
 	BaseURL    string
 }
 
-func NewConfig(conf Config) Config {
+func NewConfig(conf *Config) *Config {
+
 	if conf.ServerAddr == "" {
 		conf.ServerAddr = defaultServerAddr
 	}

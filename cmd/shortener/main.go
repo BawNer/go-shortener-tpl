@@ -4,23 +4,25 @@ import (
 	"errors"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/BawNer/go-shortener-tpl/internal/app"
 	"github.com/BawNer/go-shortener-tpl/internal/app/handlers"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
-	"github.com/spf13/viper"
+	"github.com/joho/godotenv"
 )
 
 func main() {
-	viper.AutomaticEnv()
 
-	cfg := app.Config{
-		ServerAddr: viper.GetString("SERVER_ADDRESS"),
-		BaseURL:    viper.GetString("BASE_URL"),
+	if err := godotenv.Load(); err != nil {
+		log.Fatal("Error loading .env file")
 	}
 
-	cfg = app.NewConfig(cfg)
+	cfg := app.NewConfig(&app.Config{
+		ServerAddr: os.Getenv("SERVER_ADDRESS"),
+		BaseURL:    os.Getenv("BASE_URL"),
+	})
 
 	h := &handlers.MemStorage{}
 

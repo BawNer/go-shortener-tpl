@@ -6,11 +6,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"os"
 
 	"github.com/BawNer/go-shortener-tpl/internal/app"
 	"github.com/BawNer/go-shortener-tpl/internal/app/storage"
 	"github.com/google/uuid"
-	"github.com/spf13/viper"
 )
 
 type RequestData struct {
@@ -22,14 +22,11 @@ type ResponseData struct {
 }
 
 func (m *MemStorage) ShortenerHandler(w http.ResponseWriter, r *http.Request) {
-	viper.AutomaticEnv()
 
-	cfg := app.Config{
-		ServerAddr: viper.GetString("SERVER_ADDRESS"),
-		BaseURL:    viper.GetString("BASE_URL"),
-	}
-
-	cfg = app.NewConfig(cfg)
+	cfg := app.NewConfig(&app.Config{
+		ServerAddr: os.Getenv("SERVER_ADDRESS"),
+		BaseURL:    os.Getenv("BASE_URL"),
+	})
 
 	var data RequestData
 
