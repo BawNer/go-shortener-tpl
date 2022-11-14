@@ -2,14 +2,12 @@ package app
 
 const (
 	defaultServerAddr = "127.0.0.1:8080"
-	defaultBaseURL    = ""
-	defaultScheme     = "http"
+	defaultBaseURL    = "http://127.0.0.1:8080"
 )
 
 type Config struct {
 	ServerAddr string
 	BaseURL    string
-	Scheme     string
 }
 
 func NewConfig(conf Config) Config {
@@ -19,10 +17,6 @@ func NewConfig(conf Config) Config {
 
 	if conf.BaseURL == "" {
 		conf.BaseURL = defaultBaseURL
-	}
-
-	if conf.Scheme == "" {
-		conf.Scheme = defaultScheme
 	}
 
 	return conf
