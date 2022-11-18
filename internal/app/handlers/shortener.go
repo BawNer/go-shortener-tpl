@@ -5,10 +5,9 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
-	"os"
 
-	"github.com/BawNer/go-shortener-tpl/internal/app"
 	"github.com/BawNer/go-shortener-tpl/internal/app/storage"
 	"github.com/google/uuid"
 )
@@ -23,11 +22,6 @@ type ResponseData struct {
 
 func (m *MemStorage) ShortenerHandler(w http.ResponseWriter, r *http.Request) {
 
-	cfg := app.NewConfig(&app.Config{
-		ServerAddr: os.Getenv("SERVER_ADDRESS"),
-		BaseURL:    os.Getenv("BASE_URL"),
-	})
-
 	var data RequestData
 
 	if err := json.NewDecoder(r.Body).Decode(&data); err != nil {
@@ -38,19 +32,28 @@ func (m *MemStorage) ShortenerHandler(w http.ResponseWriter, r *http.Request) {
 	shr := uuid.New().NodeID()
 	URLShort := hex.EncodeToString(shr)
 
-	m.SaveDB(
-		storage.DBKey(URLShort),
-		storage.MyDB{
-			ID:       len(m.Storage),
-			URL:      data.URL,
-			URLShort: URLShort,
-		})
+	if ConfigApp.FileStoragePath == "" {
+		m.SaveDB(
+			storage.DBKey(URLShort),
+			storage.MyDB{
+				ID:       len(m.Storage),
+				URL:      data.URL,
+				URLShort: URLShort,
+			})
+	} else {
+		// write url shorten to file
+		producer, _ := storage.NewProducer(ConfigApp.FileStoragePath)
+		defer producer.Close()
+		if err := producer.WriteEvent(&storage.Event{ShortenURL: URLShort}); err != nil {
+			log.Fatal(err)
+		}
+	}
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 
 	response := ResponseData{
-		Result: fmt.Sprintf("%s/%s", cfg.BaseURL, URLShort),
+		Result: fmt.Sprintf("%s/%s", ConfigApp.BaseURL, URLShort),
 	}
 
 	buf := bytes.NewBuffer([]byte{})
