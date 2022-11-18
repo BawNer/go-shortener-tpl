@@ -12,8 +12,8 @@ var (
 type DBKey string
 
 type MyDB struct {
-	ID  string
-	URL string
+	ID  string `json:"id"`
+	URL string `json:"url"`
 }
 
 type MemStorage struct {
