@@ -32,22 +32,24 @@ func (m *MemStorage) ShortenerHandler(w http.ResponseWriter, r *http.Request) {
 	shr := uuid.New().NodeID()
 	URLShort := hex.EncodeToString(shr)
 
-	if ConfigApp.FileStoragePath == "" {
-		m.SaveDB(
-			storage.DBKey(URLShort),
-			storage.MyDB{
-				ID:       len(m.Storage),
-				URL:      data.URL,
-				URLShort: URLShort,
-			})
-	} else {
+	evt := storage.MyDB{
+		ID:  URLShort,
+		URL: data.URL,
+	}
+
+	if ConfigApp.FileStoragePath != "" {
 		// write url shorten to file
 		producer, _ := storage.NewProducer(ConfigApp.FileStoragePath)
 		defer producer.Close()
-		if err := producer.WriteEvent(&storage.Event{ShortenURL: URLShort}); err != nil {
+
+		if err := producer.WriteEvent(&evt); err != nil {
 			log.Fatal(err)
 		}
 	}
+
+	m.SaveDB(
+		storage.DBKey(URLShort),
+		evt)
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
