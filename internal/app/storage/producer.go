@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"encoding/json"
 	"os"
+	"path/filepath"
 )
 
 type producer struct {
@@ -12,6 +13,9 @@ type producer struct {
 }
 
 func NewProducer(filename string) (*producer, error) {
+	if _, err := os.Stat(filepath.Dir(filename)); err != nil {
+		os.MkdirAll(filepath.Dir(filename), 0770)
+	}
 	file, err := os.OpenFile(filename, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0777)
 	if err != nil {
 		return nil, err
