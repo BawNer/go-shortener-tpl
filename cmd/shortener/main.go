@@ -19,6 +19,8 @@ var (
 func main() {
 	h := &handlers.MemStorage{}
 
+	_ = h.LoadDataFromFile(ConfigApp.FileStoragePath)
+
 	r := chi.NewRouter()
 
 	r.Use(middleware.RequestID)
