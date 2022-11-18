@@ -12,9 +12,8 @@ var (
 type DBKey string
 
 type MyDB struct {
-	ID       int
-	URL      string
-	URLShort string
+	ID  string
+	URL string
 }
 
 type MemStorage struct {
@@ -48,4 +47,22 @@ func (m *MemStorage) FindByID(id DBKey) (MyDB, error) {
 	}
 
 	return v, nil
+}
+
+func (m *MemStorage) LoadDataFromFile(fileName string) error {
+	consumer, err := NewConsumer(fileName)
+	if err != nil {
+		return err
+	}
+
+	fileData, _ := consumer.ReadEventAll()
+
+	for _, data := range fileData {
+		m.SaveDB(DBKey(data.ID), MyDB{
+			ID:  data.ID,
+			URL: data.URL,
+		})
+	}
+
+	return nil
 }
