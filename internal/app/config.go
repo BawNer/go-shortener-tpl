@@ -1,24 +1,52 @@
 package app
 
-const (
-	defaultServerAddr = "localhost:8080"
-	defaultBaseURL    = "http://127.0.0.1:8080"
+import (
+	"log"
+	"os"
+
+	"github.com/joho/godotenv"
 )
 
-type Config struct {
-	ServerAddr string
-	BaseURL    string
+type ConfigApp struct {
+	ServerAddr      string
+	BaseURL         string
+	FileStoragePath string
 }
 
-func NewConfig(conf *Config) *Config {
+func NewConfigApp() func() *ConfigApp {
 
-	if conf.ServerAddr == "" {
-		conf.ServerAddr = defaultServerAddr
+	if err := godotenv.Load(); err != nil {
+		log.Fatal("Error loading .env file")
 	}
 
-	if conf.BaseURL == "" {
-		conf.BaseURL = defaultBaseURL
+	const (
+		defaultServerAddr = "localhost:8080"
+		defaultBaseURL    = "http://127.0.0.1:8080"
+	)
+
+	var (
+		serverAddr      = defaultServerAddr
+		baseURL         = defaultBaseURL
+		fileStoragePath = ""
+	)
+
+	if os.Getenv("SERVER_ADDRESS") != "" {
+		serverAddr = os.Getenv("SERVER_ADDRESS")
 	}
 
-	return conf
+	if os.Getenv("BASE_URL") != "" {
+		baseURL = os.Getenv("BASE_URL")
+	}
+
+	if os.Getenv("FILE_STORAGE_PATH") != "" {
+		fileStoragePath = os.Getenv("FILE_STORAGE_PATH")
+	}
+
+	return func() *ConfigApp {
+		return &ConfigApp{
+			ServerAddr:      serverAddr,
+			BaseURL:         baseURL,
+			FileStoragePath: fileStoragePath,
+		}
+	}
 }
