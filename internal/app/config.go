@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/joho/godotenv"
+	"github.com/spf13/pflag"
 )
 
 type ConfigApp struct {
@@ -30,6 +31,10 @@ func NewConfigApp() func() *ConfigApp {
 		fileStoragePath = ""
 	)
 
+	pflag.StringVar(&serverAddr, "a", defaultServerAddr, "Server Address")
+	pflag.StringVar(&baseURL, "b", defaultBaseURL, "Base URL")
+	pflag.StringVar(&fileStoragePath, "f", "", "File Location Storage")
+
 	if os.Getenv("SERVER_ADDRESS") != "" {
 		serverAddr = os.Getenv("SERVER_ADDRESS")
 	}
@@ -41,6 +46,8 @@ func NewConfigApp() func() *ConfigApp {
 	if os.Getenv("FILE_STORAGE_PATH") != "" {
 		fileStoragePath = os.Getenv("FILE_STORAGE_PATH")
 	}
+
+	pflag.Parse()
 
 	return func() *ConfigApp {
 		return &ConfigApp{
