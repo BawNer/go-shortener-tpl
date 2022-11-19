@@ -36,8 +36,6 @@ func NewConfigApp() func() *ConfigApp {
 	flag.StringVar(&baseURL, "b", defaultBaseURL, "-b to set base url")
 	flag.StringVar(&fileStoragePath, "f", defaultFileStoragePath, "-f to set location storage files")
 
-	flag.Parse()
-
 	if os.Getenv("SERVER_ADDRESS") != "" {
 		serverAddr = os.Getenv("SERVER_ADDRESS")
 	}
@@ -49,6 +47,8 @@ func NewConfigApp() func() *ConfigApp {
 	if os.Getenv("FILE_STORAGE_PATH") != "" {
 		fileStoragePath = os.Getenv("FILE_STORAGE_PATH")
 	}
+
+	flag.Parse()
 
 	return func() *ConfigApp {
 		return &ConfigApp{
