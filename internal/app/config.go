@@ -32,9 +32,9 @@ func NewConfigApp() func() *ConfigApp {
 		fileStoragePath string
 	)
 
-	flag.StringVar(&serverAddr, "a", defaultServerAddr, "-a to set server address")
-	flag.StringVar(&baseURL, "b", defaultBaseURL, "-b to set base url")
-	flag.StringVar(&fileStoragePath, "f", defaultFileStoragePath, "-f to set location storage files")
+	flag.StringVar(&serverAddr, "-a", defaultServerAddr, "-a to set server address")
+	flag.StringVar(&baseURL, "-b", defaultBaseURL, "-b to set base url")
+	flag.StringVar(&fileStoragePath, "-f", defaultFileStoragePath, "-f to set location storage files")
 
 	flag.Parse()
 
