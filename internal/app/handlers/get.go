@@ -26,6 +26,7 @@ func (m *MemStorage) HandlerGetRequest(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusNotFound)
 		return
 	}
+	w.Header().Set("Content-Type", "text/html")
 	w.Header().Set("Location", columns.URL)
 	w.WriteHeader(http.StatusTemporaryRedirect)
 }
