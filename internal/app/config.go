@@ -26,10 +26,14 @@ func NewConfigApp() func() *ConfigApp {
 	)
 
 	var (
-		serverAddr      = defaultServerAddr
-		baseURL         = defaultBaseURL
-		fileStoragePath = ""
+		serverAddr      string
+		baseURL         string
+		fileStoragePath string
 	)
+
+	pflag.StringVar(&serverAddr, "a", defaultServerAddr, "-a to set server address")
+	pflag.StringVar(&baseURL, "b", defaultBaseURL, "-b to set base url")
+	pflag.StringVar(&fileStoragePath, "f", "", "-f to set location storage files")
 
 	pflag.Parse()
 
@@ -53,3 +57,8 @@ func NewConfigApp() func() *ConfigApp {
 		}
 	}
 }
+
+var (
+	cfg    = NewConfigApp()
+	Config = cfg()
+)

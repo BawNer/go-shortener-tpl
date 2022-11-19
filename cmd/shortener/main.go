@@ -9,24 +9,12 @@ import (
 	"github.com/BawNer/go-shortener-tpl/internal/app/handlers"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
-	"github.com/spf13/pflag"
 )
-
-var (
-	cfg       = app.NewConfigApp()
-	ConfigApp = cfg()
-)
-
-func init() {
-	pflag.StringVar(&ConfigApp.ServerAddr, "a", ConfigApp.ServerAddr, "-a Server Address")
-	pflag.StringVar(&ConfigApp.BaseURL, "b", ConfigApp.BaseURL, "-b Base URL")
-	pflag.StringVar(&ConfigApp.FileStoragePath, "f", ConfigApp.FileStoragePath, "-f File Location Storage")
-}
 
 func main() {
 	h := &handlers.MemStorage{}
 
-	_ = h.LoadDataFromFile(ConfigApp.FileStoragePath)
+	_ = h.LoadDataFromFile(app.Config.FileStoragePath)
 
 	r := chi.NewRouter()
 
@@ -39,10 +27,10 @@ func main() {
 	r.Post("/", h.HandlerPostRequest)
 	r.Get("/{ID}", h.HandlerGetRequest)
 
-	log.Printf("Server started at %s", ConfigApp.ServerAddr)
+	log.Printf("Server started at %s", app.Config.ServerAddr)
 
 	// start server
-	err := http.ListenAndServe(ConfigApp.ServerAddr, r)
+	err := http.ListenAndServe(app.Config.ServerAddr, r)
 
 	// handle err
 	if err != nil && !errors.Is(err, http.ErrServerClosed) {

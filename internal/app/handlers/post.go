@@ -12,11 +12,6 @@ import (
 	"github.com/google/uuid"
 )
 
-var (
-	cfg       = app.NewConfigApp()
-	ConfigApp = cfg()
-)
-
 func (m *MemStorage) HandlerPostRequest(w http.ResponseWriter, r *http.Request) {
 	URL, err := io.ReadAll(r.Body)
 
@@ -33,9 +28,9 @@ func (m *MemStorage) HandlerPostRequest(w http.ResponseWriter, r *http.Request) 
 		URL: string(URL),
 	}
 
-	if ConfigApp.FileStoragePath != "" {
+	if app.Config.FileStoragePath != "" {
 		// write url shorten to file
-		producer, _ := storage.NewProducer(ConfigApp.FileStoragePath)
+		producer, _ := storage.NewProducer(app.Config.FileStoragePath)
 		defer producer.Close()
 
 		if err := producer.WriteEvent(&evt); err != nil {
@@ -52,5 +47,5 @@ func (m *MemStorage) HandlerPostRequest(w http.ResponseWriter, r *http.Request) 
 
 	w.WriteHeader(http.StatusCreated)
 
-	_, _ = w.Write([]byte(fmt.Sprintf("%s/%s", ConfigApp.BaseURL, URLShort)))
+	_, _ = w.Write([]byte(fmt.Sprintf("%s/%s", app.Config.BaseURL, URLShort)))
 }

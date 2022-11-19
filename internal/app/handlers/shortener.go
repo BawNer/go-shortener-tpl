@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/BawNer/go-shortener-tpl/internal/app"
 	"github.com/BawNer/go-shortener-tpl/internal/app/storage"
 	"github.com/google/uuid"
 )
@@ -37,9 +38,9 @@ func (m *MemStorage) ShortenerHandler(w http.ResponseWriter, r *http.Request) {
 		URL: data.URL,
 	}
 
-	if ConfigApp.FileStoragePath != "" {
+	if app.Config.FileStoragePath != "" {
 		// write url shorten to file
-		producer, err := storage.NewProducer(ConfigApp.FileStoragePath)
+		producer, err := storage.NewProducer(app.Config.FileStoragePath)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -59,7 +60,7 @@ func (m *MemStorage) ShortenerHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusCreated)
 
 	response := ResponseData{
-		Result: fmt.Sprintf("%s/%s", ConfigApp.BaseURL, URLShort),
+		Result: fmt.Sprintf("%s/%s", app.Config.BaseURL, URLShort),
 	}
 
 	buf := bytes.NewBuffer([]byte{})
