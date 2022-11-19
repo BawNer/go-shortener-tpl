@@ -27,7 +27,6 @@ func (m *MemStorage) HandlerGetRequest(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Header().Del("Content-Type")
 	w.Header().Set("Location", columns.URL)
 	w.WriteHeader(http.StatusTemporaryRedirect)
 }
