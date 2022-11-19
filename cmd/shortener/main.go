@@ -21,8 +21,6 @@ func init() {
 	pflag.StringVar(&ConfigApp.ServerAddr, "a", ConfigApp.ServerAddr, "-a Server Address")
 	pflag.StringVar(&ConfigApp.BaseURL, "b", ConfigApp.BaseURL, "-b Base URL")
 	pflag.StringVar(&ConfigApp.FileStoragePath, "f", ConfigApp.FileStoragePath, "-f File Location Storage")
-
-	pflag.Parse()
 }
 
 func main() {
