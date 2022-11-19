@@ -5,7 +5,7 @@ import (
 	"os"
 
 	"github.com/joho/godotenv"
-	"github.com/spf13/pflag"
+	flag "github.com/spf13/pflag"
 )
 
 type ConfigApp struct {
@@ -21,8 +21,9 @@ func NewConfigApp() func() *ConfigApp {
 	}
 
 	const (
-		defaultServerAddr = "localhost:8080"
-		defaultBaseURL    = "http://127.0.0.1:8080"
+		defaultServerAddr      = "localhost:8080"
+		defaultBaseURL         = "http://127.0.0.1:8080"
+		defaultFileStoragePath = ""
 	)
 
 	var (
@@ -31,11 +32,11 @@ func NewConfigApp() func() *ConfigApp {
 		fileStoragePath string
 	)
 
-	pflag.StringVar(&serverAddr, "a", defaultServerAddr, "-a to set server address")
-	pflag.StringVar(&baseURL, "b", defaultBaseURL, "-b to set base url")
-	pflag.StringVar(&fileStoragePath, "f", "", "-f to set location storage files")
+	flag.StringVar(&serverAddr, "a", defaultServerAddr, "-a to set server address")
+	flag.StringVar(&baseURL, "b", defaultBaseURL, "-b to set base url")
+	flag.StringVar(&fileStoragePath, "f", defaultFileStoragePath, "-f to set location storage files")
 
-	pflag.Parse()
+	flag.Parse()
 
 	if os.Getenv("SERVER_ADDRESS") != "" {
 		serverAddr = os.Getenv("SERVER_ADDRESS")
