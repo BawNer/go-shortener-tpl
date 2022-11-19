@@ -39,7 +39,11 @@ func (m *MemStorage) ShortenerHandler(w http.ResponseWriter, r *http.Request) {
 
 	if ConfigApp.FileStoragePath != "" {
 		// write url shorten to file
-		producer, _ := storage.NewProducer(ConfigApp.FileStoragePath)
+		producer, err := storage.NewProducer(ConfigApp.FileStoragePath)
+		if err != nil {
+			log.Fatal(err)
+		}
+
 		defer producer.Close()
 
 		if err := producer.WriteEvent(&evt); err != nil {
