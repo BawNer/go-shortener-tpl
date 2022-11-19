@@ -32,6 +32,7 @@ func main() {
 	r.Use(middleware.RealIP)
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
+	r.Use(middleware.AllowContentEncoding("gzip"))
 	r.Use(middleware.Compress(5, strings.Join(compressTypes, ",")))
 
 	r.Post("/api/shorten", h.ShortenerHandler)
