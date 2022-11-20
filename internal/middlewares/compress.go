@@ -2,8 +2,8 @@ package middlewares
 
 import (
 	"compress/gzip"
-	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"strings"
 )
@@ -52,12 +52,12 @@ func GzipHandle(next http.Handler) http.Handler {
 }
 
 func (r gzipReader) Close() error {
-	err := r.Closer.Close()
-	if err != nil {
-		err = fmt.Errorf("failed readerCloserGzip: %w", err)
+	if err := r.Closer.Close(); err != nil {
+		log.Fatal(err.Error())
+		return err
 	}
 
-	return err
+	return nil
 }
 
 // DeCompress возвращает распакованный gz
