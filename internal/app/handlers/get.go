@@ -28,5 +28,6 @@ func (m *MemStorage) HandlerGetRequest(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Location", columns.URL)
+	w.Header().Set("Content-Encoding", "gzip")
 	w.WriteHeader(http.StatusTemporaryRedirect)
 }

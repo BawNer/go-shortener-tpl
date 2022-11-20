@@ -4,22 +4,12 @@ import (
 	"errors"
 	"log"
 	"net/http"
-	"strings"
 
 	"github.com/BawNer/go-shortener-tpl/internal/app"
 	"github.com/BawNer/go-shortener-tpl/internal/app/handlers"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 )
-
-var compressTypes = []string{
-	"application/javascript",
-	"application/json",
-	"text/css",
-	"text/html",
-	"text/plain",
-	"text/xml",
-}
 
 func main() {
 	h := &handlers.MemStorage{}
@@ -32,8 +22,7 @@ func main() {
 	r.Use(middleware.RealIP)
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
-	r.Use(middleware.AllowContentEncoding("gzip"))
-	r.Use(middleware.Compress(5, strings.Join(compressTypes, ",")))
+	r.Use(middleware.Compress(5))
 
 	r.Post("/api/shorten", h.ShortenerHandler)
 	r.Post("/", h.HandlerPostRequest)
