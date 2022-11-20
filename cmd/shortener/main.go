@@ -24,6 +24,7 @@ func main() {
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
 	r.Use(middlewares.GzipHandle)
+	r.Use(middlewares.DeCompress)
 
 	r.Post("/api/shorten", h.ShortenerHandler)
 	r.Post("/", h.HandlerPostRequest)

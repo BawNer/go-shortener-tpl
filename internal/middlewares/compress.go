@@ -2,6 +2,7 @@ package middlewares
 
 import (
 	"compress/gzip"
+	"fmt"
 	"io"
 	"net/http"
 	"strings"
@@ -10,6 +11,11 @@ import (
 type gzipWriter struct {
 	http.ResponseWriter
 	Writer io.Writer
+}
+
+type gzipReader struct {
+	*gzip.Reader
+	io.Closer
 }
 
 func (w gzipWriter) Write(b []byte) (int, error) {
@@ -27,6 +33,11 @@ func GzipHandle(next http.Handler) http.Handler {
 			return
 		}
 
+		if !strings.Contains(r.Header.Get("Content-Type"), "application/json") {
+			next.ServeHTTP(w, r)
+			return
+		}
+
 		// создаём gzip.Writer поверх текущего w
 		gz, err := gzip.NewWriterLevel(w, gzip.BestSpeed)
 		if err != nil {
@@ -34,9 +45,43 @@ func GzipHandle(next http.Handler) http.Handler {
 			return
 		}
 		defer gz.Close()
-
 		w.Header().Set("Content-Encoding", "gzip")
 		// передаём обработчику страницы переменную типа gzipWriter для вывода данных
 		next.ServeHTTP(gzipWriter{ResponseWriter: w, Writer: gz}, r)
+	})
+}
+
+func (r gzipReader) Close() error {
+	err := r.Closer.Close()
+	if err != nil {
+		err = fmt.Errorf("failed readerCloserGzip: %w", err)
+	}
+
+	return err
+}
+
+// DeCompress возвращает распакованный gz
+func DeCompress(next http.Handler) http.Handler {
+	// переменная reader будет равна r.Body или *gzip.Reader
+	return http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+		if !strings.Contains(request.Header.Get("Content-Encoding"), "gzip") {
+			next.ServeHTTP(writer, request)
+			return
+		}
+		request.Header.Del("Content-Length")
+		reader, err := gzip.NewReader(request.Body)
+		if err != nil {
+			io.WriteString(writer, err.Error())
+			return
+		}
+
+		defer reader.Close()
+
+		request.Body = gzipReader{
+			reader,
+			request.Body,
+		}
+
+		next.ServeHTTP(writer, request)
 	})
 }
