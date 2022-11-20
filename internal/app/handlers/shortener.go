@@ -56,9 +56,6 @@ func (m *MemStorage) ShortenerHandler(w http.ResponseWriter, r *http.Request) {
 		storage.DBKey(URLShort),
 		evt)
 
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusCreated)
-
 	response := ResponseData{
 		Result: fmt.Sprintf("%s/%s", app.Config.BaseURL, URLShort),
 	}
@@ -68,6 +65,9 @@ func (m *MemStorage) ShortenerHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
+
+	w.Header().Set("Content-Type", http.DetectContentType(buf.Bytes()))
+	w.WriteHeader(http.StatusCreated)
 
 	_, _ = w.Write(buf.Bytes())
 }
