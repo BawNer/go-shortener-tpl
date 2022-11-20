@@ -13,9 +13,11 @@ import (
 )
 
 func main() {
-	h := &handlers.MemStorage{}
+	h := &handlers.Repository{}
 
-	_ = h.LoadDataFromFile(app.Config.FileStoragePath)
+	if err := h.LoadDataFromFile(app.Config.FileStoragePath); err != nil {
+		log.Print(err.Error())
+	}
 
 	r := chi.NewRouter()
 
@@ -24,7 +26,7 @@ func main() {
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
 	r.Use(middlewares.GzipHandle)
-	r.Use(middlewares.DeCompress)
+	r.Use(middlewares.Decompress)
 
 	r.Post("/api/shorten", h.ShortenerHandler)
 	r.Post("/", h.HandlerPostRequest)

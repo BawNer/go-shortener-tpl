@@ -14,8 +14,7 @@ type ConfigApp struct {
 	FileStoragePath string
 }
 
-func NewConfigApp() func() *ConfigApp {
-
+func NewConfigApp() *ConfigApp {
 	if err := godotenv.Load(); err != nil {
 		log.Println("Error loading .env file, load default values")
 	}
@@ -50,16 +49,13 @@ func NewConfigApp() func() *ConfigApp {
 		fileStoragePath = os.Getenv("FILE_STORAGE_PATH")
 	}
 
-	return func() *ConfigApp {
-		return &ConfigApp{
-			ServerAddr:      serverAddr,
-			BaseURL:         baseURL,
-			FileStoragePath: fileStoragePath,
-		}
+	return &ConfigApp{
+		ServerAddr:      serverAddr,
+		BaseURL:         baseURL,
+		FileStoragePath: fileStoragePath,
 	}
 }
 
 var (
-	cfg    = NewConfigApp()
-	Config = cfg()
+	Config = NewConfigApp()
 )

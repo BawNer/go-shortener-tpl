@@ -8,11 +8,11 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
-type MemStorage struct {
-	storage.MemStorage
+type Repository struct {
+	storage.Repository
 }
 
-func (m *MemStorage) HandlerGetRequest(w http.ResponseWriter, r *http.Request) {
+func (m *Repository) HandlerGetRequest(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "ID")
 
 	if id == "" {

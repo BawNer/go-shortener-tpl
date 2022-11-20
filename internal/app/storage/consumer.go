@@ -14,7 +14,7 @@ type consumer struct {
 }
 
 func NewConsumer(fileName string) (*consumer, error) {
-	file, err := os.OpenFile(fileName, os.O_RDONLY|os.O_CREATE, 0777)
+	file, err := os.OpenFile(fileName, os.O_RDONLY|os.O_CREATE, 0644)
 	if err != nil {
 		return nil, err
 	}
@@ -25,18 +25,18 @@ func NewConsumer(fileName string) (*consumer, error) {
 	}, nil
 }
 
-func (c *consumer) ReadEvent() (*MyDB, error) {
-	event := &MyDB{}
+func (c *consumer) ReadEvent() (*LocalShortenData, error) {
+	event := &LocalShortenData{}
 	if err := c.decoder.Decode(&event); err != nil {
 		return nil, err
 	}
 	return event, nil
 }
 
-func (c *consumer) ReadEventAll() ([]MyDB, error) {
+func (c *consumer) ReadEventAll() ([]LocalShortenData, error) {
 	var (
-		event    MyDB
-		eventAll []MyDB
+		event    LocalShortenData
+		eventAll []LocalShortenData
 	)
 	for c.scanner.Scan() {
 		data := c.scanner.Bytes()

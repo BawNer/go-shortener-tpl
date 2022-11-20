@@ -12,7 +12,7 @@ import (
 	"github.com/google/uuid"
 )
 
-func (m *MemStorage) HandlerPostRequest(w http.ResponseWriter, r *http.Request) {
+func (m *Repository) HandlerPostRequest(w http.ResponseWriter, r *http.Request) {
 	URL, err := io.ReadAll(r.Body)
 
 	if err != nil {
@@ -21,16 +21,21 @@ func (m *MemStorage) HandlerPostRequest(w http.ResponseWriter, r *http.Request) 
 	}
 
 	shr := uuid.New().NodeID()
-	URLShort := hex.EncodeToString(shr)
+	shortURL := hex.EncodeToString(shr)
 
-	evt := storage.MyDB{
-		ID:  URLShort,
+	evt := storage.LocalShortenData{
+		ID:  shortURL,
 		URL: string(URL),
 	}
 
 	if app.Config.FileStoragePath != "" {
 		// write url shorten to file
-		producer, _ := storage.NewProducer(app.Config.FileStoragePath)
+		producer, err := storage.NewProducer(app.Config.FileStoragePath)
+
+		if err != nil {
+			log.Fatal(err.Error())
+		}
+
 		defer producer.Close()
 
 		if err := producer.WriteEvent(&evt); err != nil {
@@ -38,8 +43,8 @@ func (m *MemStorage) HandlerPostRequest(w http.ResponseWriter, r *http.Request) 
 		}
 	}
 
-	m.SaveDB(
-		storage.DBKey(URLShort),
+	m.Save(
+		storage.DBKey(shortURL),
 		evt,
 	)
 
@@ -47,5 +52,5 @@ func (m *MemStorage) HandlerPostRequest(w http.ResponseWriter, r *http.Request) 
 
 	w.WriteHeader(http.StatusCreated)
 
-	_, _ = w.Write([]byte(fmt.Sprintf("%s/%s", app.Config.BaseURL, URLShort)))
+	_, _ = w.Write([]byte(fmt.Sprintf("%s/%s", app.Config.BaseURL, shortURL)))
 }

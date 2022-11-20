@@ -13,9 +13,12 @@ type producer struct {
 
 func NewProducer(fileName string) (*producer, error) {
 	if _, err := os.Stat(filepath.Dir(fileName)); err != nil {
-		os.MkdirAll(filepath.Dir(fileName), 0770)
+		err := os.MkdirAll(filepath.Dir(fileName), 0770)
+		if err != nil {
+			return nil, err
+		}
 	}
-	file, err := os.OpenFile(fileName, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0777)
+	file, err := os.OpenFile(fileName, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0644)
 	if err != nil {
 		return nil, err
 	}
@@ -24,10 +27,12 @@ func NewProducer(fileName string) (*producer, error) {
 		encoder: json.NewEncoder(file),
 	}, nil
 }
-func (p *producer) WriteEvent(event *MyDB) error {
+
+func (p *producer) WriteEvent(event *LocalShortenData) error {
 	p.encoder.SetEscapeHTML(false)
 	return p.encoder.Encode(&event)
 }
+
 func (p *producer) Close() error {
 	return p.file.Close()
 }

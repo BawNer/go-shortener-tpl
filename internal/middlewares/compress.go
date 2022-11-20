@@ -41,7 +41,9 @@ func GzipHandle(next http.Handler) http.Handler {
 		// создаём gzip.Writer поверх текущего w
 		gz, err := gzip.NewWriterLevel(w, gzip.BestSpeed)
 		if err != nil {
-			io.WriteString(w, err.Error())
+			if _, err := io.WriteString(w, err.Error()); err != nil {
+				log.Println(err.Error())
+			}
 			return
 		}
 		defer gz.Close()
@@ -53,15 +55,14 @@ func GzipHandle(next http.Handler) http.Handler {
 
 func (r gzipReader) Close() error {
 	if err := r.Closer.Close(); err != nil {
-		log.Fatal(err.Error())
 		return err
 	}
 
 	return nil
 }
 
-// DeCompress возвращает распакованный gz
-func DeCompress(next http.Handler) http.Handler {
+// Decompress возвращает распакованный gz
+func Decompress(next http.Handler) http.Handler {
 	// переменная reader будет равна r.Body или *gzip.Reader
 	return http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
 		if !strings.Contains(request.Header.Get("Content-Encoding"), "gzip") {
@@ -71,15 +72,17 @@ func DeCompress(next http.Handler) http.Handler {
 		request.Header.Del("Content-Length")
 		reader, err := gzip.NewReader(request.Body)
 		if err != nil {
-			io.WriteString(writer, err.Error())
+			if _, err := io.WriteString(writer, err.Error()); err != nil {
+				log.Println(err.Error())
+			}
 			return
 		}
 
 		defer reader.Close()
 
 		request.Body = gzipReader{
-			reader,
-			request.Body,
+			Reader: reader,
+			Closer: request.Body,
 		}
 
 		next.ServeHTTP(writer, request)

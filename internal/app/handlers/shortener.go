@@ -21,8 +21,7 @@ type ResponseData struct {
 	Result string `json:"result"`
 }
 
-func (m *MemStorage) ShortenerHandler(w http.ResponseWriter, r *http.Request) {
-
+func (m *Repository) ShortenerHandler(w http.ResponseWriter, r *http.Request) {
 	var data RequestData
 
 	if err := json.NewDecoder(r.Body).Decode(&data); err != nil {
@@ -31,10 +30,10 @@ func (m *MemStorage) ShortenerHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	shr := uuid.New().NodeID()
-	URLShort := hex.EncodeToString(shr)
+	shortURL := hex.EncodeToString(shr)
 
-	evt := storage.MyDB{
-		ID:  URLShort,
+	evt := storage.LocalShortenData{
+		ID:  shortURL,
 		URL: data.URL,
 	}
 
@@ -52,16 +51,16 @@ func (m *MemStorage) ShortenerHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	m.SaveDB(
-		storage.DBKey(URLShort),
+	m.Save(
+		storage.DBKey(shortURL),
 		evt)
 
 	response := ResponseData{
-		Result: fmt.Sprintf("%s/%s", app.Config.BaseURL, URLShort),
+		Result: fmt.Sprintf("%s/%s", app.Config.BaseURL, shortURL),
 	}
 
-	buf := bytes.NewBuffer([]byte{})
-	if err := json.NewEncoder(buf).Encode(&response); err != nil {
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(&response); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
