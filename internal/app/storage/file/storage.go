@@ -39,10 +39,7 @@ func New(fileName string) (*File, error) {
 
 func (p *File) SaveURL(id string, data *storage.LocalShortenData) error {
 	p.encoder.SetEscapeHTML(false)
-	if err := p.encoder.Encode(&data); err != nil {
-		return err
-	}
-	return p.Close()
+	return p.encoder.Encode(&data)
 }
 
 func (p *File) GetURL(id string) (*storage.LocalShortenData, error) {
