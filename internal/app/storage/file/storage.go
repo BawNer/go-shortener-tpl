@@ -55,8 +55,6 @@ func (p *File) GetURL(id string) (*storage.LocalShortenData, error) {
 				URL: event.URL,
 			}, nil
 		}
-
-		return nil, storage.ErrNotFound
 	}
 
 	return &storage.LocalShortenData{}, nil
