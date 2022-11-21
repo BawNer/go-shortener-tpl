@@ -20,8 +20,9 @@ var repository storage.Storage
 func main() {
 	if app.Config.FileStoragePath != "" {
 		repository, _ = file.New(app.Config.FileStoragePath)
+	} else {
+		repository, _ = memory.New()
 	}
-	repository, _ = memory.New()
 
 	h := handlers.NewHandler(repository)
 
