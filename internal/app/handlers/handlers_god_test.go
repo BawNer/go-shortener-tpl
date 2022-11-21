@@ -6,8 +6,14 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/BawNer/go-shortener-tpl/internal/app"
+	"github.com/BawNer/go-shortener-tpl/internal/app/storage"
+	"github.com/BawNer/go-shortener-tpl/internal/app/storage/file"
+	"github.com/BawNer/go-shortener-tpl/internal/app/storage/memory"
 	"github.com/go-chi/chi/v5"
 )
+
+var repository storage.Storage
 
 func TestMemStorage_HandlerRequest(t *testing.T) {
 	test := []struct {
@@ -33,10 +39,17 @@ func TestMemStorage_HandlerRequest(t *testing.T) {
 	for _, tt := range test {
 		t.Run(tt.name, func(t *testing.T) {
 			request := httptest.NewRequest(tt.method, "http://localhost:8080", nil)
+			if app.Config.FileStoragePath != "" {
+				repository, _ = file.New(app.Config.FileStoragePath)
+			}
+			repository, _ = memory.New()
+
+			h := NewHandler(repository)
+
 			w := httptest.NewRecorder()
 			s := chi.NewRouter()
-			s.Post("/", HandlerPostRequest)
-			s.Get("/{ID}", HandlerGetRequest)
+			s.Post("/", h.HandlerPostRequest)
+			s.Get("/{ID}", h.HandlerGetRequest)
 			s.ServeHTTP(w, request)
 			res := w.Result()
 

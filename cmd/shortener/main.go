@@ -17,16 +17,12 @@ import (
 
 var repository storage.Storage
 
-func init() {
+func main() {
 	if app.Config.FileStoragePath != "" {
 		repository, _ = file.New(app.Config.FileStoragePath)
-		return
 	}
-
 	repository, _ = memory.New()
-}
 
-func main() {
 	h := handlers.NewHandler(repository)
 
 	r := chi.NewRouter()
