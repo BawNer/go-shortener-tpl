@@ -21,7 +21,7 @@ type ResponseData struct {
 	Result string `json:"result"`
 }
 
-func (m *Repository) ShortenerHandler(w http.ResponseWriter, r *http.Request) {
+func ShortenerHandler(w http.ResponseWriter, r *http.Request) {
 	var data RequestData
 
 	if err := json.NewDecoder(r.Body).Decode(&data); err != nil {
@@ -37,21 +37,13 @@ func (m *Repository) ShortenerHandler(w http.ResponseWriter, r *http.Request) {
 		URL: data.URL,
 	}
 
-	if app.Config.FileStoragePath != "" {
-		// write url shorten to file
-		producer, err := storage.NewProducer(app.Config.FileStoragePath)
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		defer producer.Close()
-
-		if err := producer.WriteEvent(&evt); err != nil {
+	if app.Memory.InFile != nil {
+		if err := app.Memory.InFile.Producer.WriteEvent(&evt); err != nil {
 			log.Fatal(err)
 		}
 	}
 
-	m.Save(
+	app.Memory.InMemory.Save(
 		storage.DBKey(shortURL),
 		evt)
 

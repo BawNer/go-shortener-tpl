@@ -1,13 +1,6 @@
 package storage
 
-import (
-	"errors"
-	"sync"
-)
-
-var (
-	ErrNotFound = errors.New("not found")
-)
+import "sync"
 
 type DBKey string
 
@@ -16,31 +9,35 @@ type LocalShortenData struct {
 	URL string `json:"url"`
 }
 
-type Repository struct {
+type InMemory struct {
 	mu      sync.RWMutex
-	Storage map[DBKey]LocalShortenData
+	storage map[DBKey]LocalShortenData
 }
 
 type MemStorageInterface interface {
 	SaveDB(k DBKey, d LocalShortenData) map[DBKey]LocalShortenData
 	FindByID(k DBKey) (LocalShortenData, error)
+	NewLocalStorage() *InMemory
 }
 
-func (r *Repository) Save(k DBKey, d LocalShortenData) LocalShortenData {
-	r.mu.Lock()
-	defer r.mu.Unlock()
-	if r.Storage == nil {
-		r.Storage = map[DBKey]LocalShortenData{}
+func NewLocalStorage() *InMemory {
+	return &InMemory{
+		storage: map[DBKey]LocalShortenData{},
 	}
-	r.Storage[k] = d
-	return r.Storage[k]
 }
 
-func (r *Repository) FindByID(id DBKey) (LocalShortenData, error) {
-	r.mu.RLock()
-	defer r.mu.RUnlock()
+func (m *InMemory) Save(k DBKey, d LocalShortenData) LocalShortenData {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	m.storage[k] = d
+	return m.storage[k]
+}
 
-	v, ok := r.Storage[id]
+func (m *InMemory) FindByID(id DBKey) (LocalShortenData, error) {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+
+	v, ok := m.storage[id]
 
 	if !ok {
 		return LocalShortenData{}, ErrNotFound
@@ -49,7 +46,7 @@ func (r *Repository) FindByID(id DBKey) (LocalShortenData, error) {
 	return v, nil
 }
 
-func (r *Repository) LoadDataFromFile(fileName string) error {
+func (m *InMemory) LoadDataFromFile(fileName string) error {
 	consumer, err := NewConsumer(fileName)
 	if err != nil {
 		return err
@@ -62,7 +59,7 @@ func (r *Repository) LoadDataFromFile(fileName string) error {
 	}
 
 	for _, data := range fileData {
-		r.Save(DBKey(data.ID), LocalShortenData{
+		m.Save(DBKey(data.ID), LocalShortenData{
 			ID:  data.ID,
 			URL: data.URL,
 		})

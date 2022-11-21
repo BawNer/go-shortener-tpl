@@ -12,7 +12,7 @@ import (
 	"github.com/google/uuid"
 )
 
-func (m *Repository) HandlerPostRequest(w http.ResponseWriter, r *http.Request) {
+func HandlerPostRequest(w http.ResponseWriter, r *http.Request) {
 	URL, err := io.ReadAll(r.Body)
 
 	if err != nil {
@@ -43,7 +43,7 @@ func (m *Repository) HandlerPostRequest(w http.ResponseWriter, r *http.Request) 
 		}
 	}
 
-	m.Save(
+	app.Memory.InMemory.Save(
 		storage.DBKey(shortURL),
 		evt,
 	)

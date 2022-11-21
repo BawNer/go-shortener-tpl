@@ -6,12 +6,12 @@ import (
 	"path/filepath"
 )
 
-type producer struct {
+type Producer struct {
 	file    *os.File
 	encoder *json.Encoder
 }
 
-func NewProducer(fileName string) (*producer, error) {
+func NewProducer(fileName string) (*Producer, error) {
 	if _, err := os.Stat(filepath.Dir(fileName)); err != nil {
 		err := os.MkdirAll(filepath.Dir(fileName), 0770)
 		if err != nil {
@@ -22,17 +22,17 @@ func NewProducer(fileName string) (*producer, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &producer{
+	return &Producer{
 		file:    file,
 		encoder: json.NewEncoder(file),
 	}, nil
 }
 
-func (p *producer) WriteEvent(event *LocalShortenData) error {
+func (p *Producer) WriteEvent(event *LocalShortenData) error {
 	p.encoder.SetEscapeHTML(false)
 	return p.encoder.Encode(&event)
 }
 
-func (p *producer) Close() error {
+func (p *Producer) Close() error {
 	return p.file.Close()
 }

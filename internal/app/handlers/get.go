@@ -3,16 +3,13 @@ package handlers
 import (
 	"net/http"
 
+	"github.com/BawNer/go-shortener-tpl/internal/app"
 	"github.com/BawNer/go-shortener-tpl/internal/app/storage"
 
 	"github.com/go-chi/chi/v5"
 )
 
-type Repository struct {
-	storage.Repository
-}
-
-func (m *Repository) HandlerGetRequest(w http.ResponseWriter, r *http.Request) {
+func HandlerGetRequest(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "ID")
 
 	if id == "" {
@@ -20,7 +17,7 @@ func (m *Repository) HandlerGetRequest(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	columns, err := m.FindByID(storage.DBKey(id))
+	columns, err := app.Memory.InMemory.FindByID(storage.DBKey(id))
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusNotFound)

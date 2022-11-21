@@ -12,12 +12,13 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 )
 
-func main() {
-	h := &handlers.Repository{}
-
-	if err := h.LoadDataFromFile(app.Config.FileStoragePath); err != nil {
-		log.Print(err.Error())
+func init() {
+	if err := app.Memory.InMemory.LoadDataFromFile(app.Config.FileStoragePath); err != nil {
+		log.Println(err.Error())
 	}
+}
+
+func main() {
 
 	r := chi.NewRouter()
 
@@ -28,9 +29,9 @@ func main() {
 	r.Use(middlewares.GzipHandle)
 	r.Use(middlewares.Decompress)
 
-	r.Post("/api/shorten", h.ShortenerHandler)
-	r.Post("/", h.HandlerPostRequest)
-	r.Get("/{ID}", h.HandlerGetRequest)
+	r.Post("/api/shorten", handlers.ShortenerHandler)
+	r.Post("/", handlers.HandlerPostRequest)
+	r.Get("/{ID}", handlers.HandlerGetRequest)
 
 	log.Printf("Server started at %s", app.Config.ServerAddr)
 
