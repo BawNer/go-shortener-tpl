@@ -1,42 +1,44 @@
-package storage
+package file
 
 import (
 	"bufio"
 	"encoding/json"
 	"log"
 	"os"
+
+	"github.com/BawNer/go-shortener-tpl/internal/app/storage"
 )
 
-type consumer struct {
+type Consumer struct {
 	file    *os.File
 	decoder *json.Decoder
 	scanner *bufio.Scanner
 }
 
-func NewConsumer(fileName string) (*consumer, error) {
+func NewConsumer(fileName string) (*Consumer, error) {
 	file, err := os.OpenFile(fileName, os.O_RDONLY|os.O_CREATE, 0644)
 	if err != nil {
 		return nil, err
 	}
-	return &consumer{
+	return &Consumer{
 		file:    file,
 		decoder: json.NewDecoder(file),
 		scanner: bufio.NewScanner(file),
 	}, nil
 }
 
-func (c *consumer) ReadEvent() (*LocalShortenData, error) {
-	event := &LocalShortenData{}
+func (c *Consumer) ReadEvent() (*storage.LocalShortenData, error) {
+	event := &storage.LocalShortenData{}
 	if err := c.decoder.Decode(&event); err != nil {
 		return nil, err
 	}
 	return event, nil
 }
 
-func (c *consumer) ReadEventAll() ([]LocalShortenData, error) {
+func (c *Consumer) ReadEventAll() ([]storage.LocalShortenData, error) {
 	var (
-		event    LocalShortenData
-		eventAll []LocalShortenData
+		event    storage.LocalShortenData
+		eventAll []storage.LocalShortenData
 	)
 	for c.scanner.Scan() {
 		data := c.scanner.Bytes()
@@ -49,6 +51,6 @@ func (c *consumer) ReadEventAll() ([]LocalShortenData, error) {
 	return eventAll, nil
 }
 
-func (c *consumer) Close() error {
+func (c *Consumer) Close() error {
 	return c.file.Close()
 }

@@ -21,7 +21,7 @@ type ResponseData struct {
 	Result string `json:"result"`
 }
 
-func ShortenerHandler(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) ShortenerHandler(w http.ResponseWriter, r *http.Request) {
 	var data RequestData
 
 	if err := json.NewDecoder(r.Body).Decode(&data); err != nil {
@@ -37,15 +37,13 @@ func ShortenerHandler(w http.ResponseWriter, r *http.Request) {
 		URL: data.URL,
 	}
 
-	if app.Memory.InFile != nil {
-		if err := app.Memory.InFile.Producer.WriteEvent(&evt); err != nil {
-			log.Fatal(err)
-		}
+	err := h.storage.SaveURL(
+		shortURL,
+		&evt,
+	)
+	if err != nil {
+		log.Fatal(err.Error())
 	}
-
-	app.Memory.InMemory.Save(
-		storage.DBKey(shortURL),
-		evt)
 
 	response := ResponseData{
 		Result: fmt.Sprintf("%s/%s", app.Config.BaseURL, shortURL),

@@ -3,13 +3,10 @@ package handlers
 import (
 	"net/http"
 
-	"github.com/BawNer/go-shortener-tpl/internal/app"
-	"github.com/BawNer/go-shortener-tpl/internal/app/storage"
-
 	"github.com/go-chi/chi/v5"
 )
 
-func HandlerGetRequest(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) HandlerGetRequest(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "ID")
 
 	if id == "" {
@@ -17,7 +14,7 @@ func HandlerGetRequest(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	columns, err := app.Memory.InMemory.FindByID(storage.DBKey(id))
+	columns, err := h.storage.GetURL(id)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusNotFound)
@@ -25,6 +22,5 @@ func HandlerGetRequest(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Location", columns.URL)
-	w.Header().Set("Content-Encoding", "gzip")
 	w.WriteHeader(http.StatusTemporaryRedirect)
 }

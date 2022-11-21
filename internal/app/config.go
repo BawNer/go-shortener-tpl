@@ -4,7 +4,6 @@ import (
 	"log"
 	"os"
 
-	"github.com/BawNer/go-shortener-tpl/internal/app/storage"
 	"github.com/joho/godotenv"
 	flag "github.com/spf13/pflag"
 )
@@ -59,5 +58,4 @@ func NewConfigApp() *ConfigApp {
 
 var (
 	Config = NewConfigApp()
-	Memory = storage.NewMemory(Config.FileStoragePath)
 )

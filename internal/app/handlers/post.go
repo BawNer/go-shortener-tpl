@@ -12,7 +12,7 @@ import (
 	"github.com/google/uuid"
 )
 
-func HandlerPostRequest(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) HandlerPostRequest(w http.ResponseWriter, r *http.Request) {
 	URL, err := io.ReadAll(r.Body)
 
 	if err != nil {
@@ -27,26 +27,13 @@ func HandlerPostRequest(w http.ResponseWriter, r *http.Request) {
 		ID:  shortURL,
 		URL: string(URL),
 	}
-
-	if app.Config.FileStoragePath != "" {
-		// write url shorten to file
-		producer, err := storage.NewProducer(app.Config.FileStoragePath)
-
-		if err != nil {
-			log.Fatal(err.Error())
-		}
-
-		defer producer.Close()
-
-		if err := producer.WriteEvent(&evt); err != nil {
-			log.Fatal(err)
-		}
-	}
-
-	app.Memory.InMemory.Save(
-		storage.DBKey(shortURL),
-		evt,
+	err = h.storage.SaveURL(
+		shortURL,
+		&evt,
 	)
+	if err != nil {
+		log.Fatal(err.Error())
+	}
 
 	w.Header().Set("Content-Type", "text/plain")
 

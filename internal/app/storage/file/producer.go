@@ -1,9 +1,11 @@
-package storage
+package file
 
 import (
 	"encoding/json"
 	"os"
 	"path/filepath"
+
+	"github.com/BawNer/go-shortener-tpl/internal/app/storage"
 )
 
 type Producer struct {
@@ -28,7 +30,7 @@ func NewProducer(fileName string) (*Producer, error) {
 	}, nil
 }
 
-func (p *Producer) WriteEvent(event *LocalShortenData) error {
+func (p *Producer) WriteEvent(event *storage.LocalShortenData) error {
 	p.encoder.SetEscapeHTML(false)
 	return p.encoder.Encode(&event)
 }

@@ -7,18 +7,27 @@ import (
 
 	"github.com/BawNer/go-shortener-tpl/internal/app"
 	"github.com/BawNer/go-shortener-tpl/internal/app/handlers"
+	"github.com/BawNer/go-shortener-tpl/internal/app/storage"
+	"github.com/BawNer/go-shortener-tpl/internal/app/storage/file"
+	"github.com/BawNer/go-shortener-tpl/internal/app/storage/memory"
 	"github.com/BawNer/go-shortener-tpl/internal/middlewares"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 )
 
+var repository storage.Storage
+
 func init() {
-	if err := app.Memory.InMemory.LoadDataFromFile(app.Config.FileStoragePath); err != nil {
-		log.Println(err.Error())
+	if app.Config.FileStoragePath != "" {
+		repository, _ = file.New(app.Config.FileStoragePath)
+		return
 	}
+
+	repository, _ = memory.New()
 }
 
 func main() {
+	h := handlers.NewHandler(repository)
 
 	r := chi.NewRouter()
 
@@ -29,9 +38,9 @@ func main() {
 	r.Use(middlewares.GzipHandle)
 	r.Use(middlewares.Decompress)
 
-	r.Post("/api/shorten", handlers.ShortenerHandler)
-	r.Post("/", handlers.HandlerPostRequest)
-	r.Get("/{ID}", handlers.HandlerGetRequest)
+	r.Post("/api/shorten", h.ShortenerHandler)
+	r.Post("/", h.HandlerPostRequest)
+	r.Get("/{ID}", h.HandlerGetRequest)
 
 	log.Printf("Server started at %s", app.Config.ServerAddr)
 
