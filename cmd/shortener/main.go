@@ -20,6 +20,10 @@ var repository storage.Storage
 func main() {
 	if app.Config.FileStoragePath != "" {
 		repository, _ = file.New(app.Config.FileStoragePath)
+		err := repository.Init()
+		if err != nil {
+			log.Fatal(err)
+		}
 	} else {
 		repository, _ = memory.New()
 	}

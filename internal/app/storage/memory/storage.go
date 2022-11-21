@@ -17,6 +17,10 @@ func New() (*Memory, error) {
 	}, nil
 }
 
+func (m *Memory) Init() error {
+	return nil
+}
+
 func (m *Memory) SaveURL(id string, data *storage.LocalShortenData) error {
 	m.mu.Lock()
 	defer m.mu.Unlock()

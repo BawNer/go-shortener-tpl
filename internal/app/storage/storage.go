@@ -14,4 +14,5 @@ type LocalShortenData struct {
 type Storage interface {
 	SaveURL(id string, data *LocalShortenData) error
 	GetURL(id string) (*LocalShortenData, error)
+	Init() error
 }

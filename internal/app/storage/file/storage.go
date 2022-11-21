@@ -6,12 +6,14 @@ import (
 	"path/filepath"
 
 	"github.com/BawNer/go-shortener-tpl/internal/app/storage"
+	"github.com/BawNer/go-shortener-tpl/internal/app/storage/memory"
 )
 
 type File struct {
 	file     *os.File
 	encoder  *json.Encoder
 	consumer *Consumer
+	memory   *memory.Memory
 }
 
 func New(fileName string) (*File, error) {
@@ -30,36 +32,47 @@ func New(fileName string) (*File, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	memoryStorage, _ := memory.New()
 	return &File{
 		file:     file,
 		encoder:  json.NewEncoder(file),
 		consumer: consumer,
+		memory:   memoryStorage,
 	}, nil
 }
 
-func (p *File) SaveURL(id string, data *storage.LocalShortenData) error {
-	p.encoder.SetEscapeHTML(false)
-	return p.encoder.Encode(&data)
-}
+func (f *File) Init() error {
+	events, err := f.consumer.ReadEventAll()
 
-func (p *File) GetURL(id string) (*storage.LocalShortenData, error) {
-	events, err := p.consumer.ReadEventAll()
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	for _, event := range events {
-		if event.ID == id {
-			return &storage.LocalShortenData{
-				ID:  event.ID,
-				URL: event.URL,
-			}, nil
+		err := f.memory.SaveURL(event.ID, &event)
+		if err != nil {
+			return err
 		}
 	}
 
-	return &storage.LocalShortenData{}, nil
+	return nil
 }
 
-func (p *File) Close() error {
-	return p.file.Close()
+func (f *File) SaveURL(id string, data *storage.LocalShortenData) error {
+	f.encoder.SetEscapeHTML(false)
+	err := f.encoder.Encode(&data)
+	if err != nil {
+		return err
+	}
+
+	return f.memory.SaveURL(data.ID, data)
+}
+
+func (f *File) GetURL(id string) (*storage.LocalShortenData, error) {
+	return f.memory.GetURL(id)
+}
+
+func (f *File) Close() error {
+	return f.file.Close()
 }
