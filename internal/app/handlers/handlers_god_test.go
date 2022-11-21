@@ -32,12 +32,11 @@ func TestMemStorage_HandlerRequest(t *testing.T) {
 
 	for _, tt := range test {
 		t.Run(tt.name, func(t *testing.T) {
-			sh := &Repository{}
 			request := httptest.NewRequest(tt.method, "http://localhost:8080", nil)
 			w := httptest.NewRecorder()
 			s := chi.NewRouter()
-			s.Post("/", sh.HandlerPostRequest)
-			s.Get("/{ID}", sh.HandlerGetRequest)
+			s.Post("/", HandlerPostRequest)
+			s.Get("/{ID}", HandlerGetRequest)
 			s.ServeHTTP(w, request)
 			res := w.Result()
 

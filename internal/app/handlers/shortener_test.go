@@ -51,7 +51,6 @@ func TestMemStorage_ShortenerHandler(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			sh := &Repository{}
 			dataBody, err := json.Marshal(tt.args.body)
 			if err != nil {
 				t.Fatal(err)
@@ -59,7 +58,7 @@ func TestMemStorage_ShortenerHandler(t *testing.T) {
 			request := httptest.NewRequest(tt.args.method, tt.args.url, bytes.NewReader(dataBody))
 			w := httptest.NewRecorder()
 			s := chi.NewRouter()
-			s.Post(tt.args.path, sh.ShortenerHandler)
+			s.Post(tt.args.path, ShortenerHandler)
 			s.ServeHTTP(w, request)
 			res := w.Result()
 
