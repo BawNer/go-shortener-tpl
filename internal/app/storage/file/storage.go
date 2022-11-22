@@ -1,0 +1,77 @@
+package file
+
+import (
+	"encoding/json"
+	"os"
+	"path/filepath"
+
+	"github.com/BawNer/go-shortener-tpl/internal/app/storage"
+	"github.com/BawNer/go-shortener-tpl/internal/app/storage/memory"
+)
+
+type File struct {
+	file     *os.File
+	encoder  *json.Encoder
+	consumer *Consumer
+	memory   *memory.Memory
+}
+
+func New(fileName string) (*File, error) {
+	if _, err := os.Stat(filepath.Dir(fileName)); err != nil {
+		err := os.MkdirAll(filepath.Dir(fileName), 0770)
+		if err != nil {
+			return nil, err
+		}
+	}
+	file, err := os.OpenFile(fileName, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0644)
+	if err != nil {
+		return nil, err
+	}
+
+	consumer, err := NewConsumer(fileName)
+	if err != nil {
+		return nil, err
+	}
+
+	memoryStorage, _ := memory.New()
+	return &File{
+		file:     file,
+		encoder:  json.NewEncoder(file),
+		consumer: consumer,
+		memory:   memoryStorage,
+	}, nil
+}
+
+func (f *File) Init() error {
+	events, err := f.consumer.ReadEventAll()
+	if err != nil {
+		return err
+	}
+
+	for _, event := range events {
+		err := f.memory.SaveURL(event.ID, &event)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (f *File) SaveURL(id string, data *storage.LocalShortenData) error {
+	f.encoder.SetEscapeHTML(false)
+	err := f.encoder.Encode(&data)
+	if err != nil {
+		return err
+	}
+
+	return f.memory.SaveURL(data.ID, data)
+}
+
+func (f *File) GetURL(id string) (*storage.LocalShortenData, error) {
+	return f.memory.GetURL(id)
+}
+
+func (f *File) Close() error {
+	return f.file.Close()
+}
