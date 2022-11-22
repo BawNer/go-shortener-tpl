@@ -33,7 +33,6 @@ func (m *Memory) GetURL(id string) (*storage.LocalShortenData, error) {
 	defer m.mu.RUnlock()
 
 	v, ok := m.storage[id]
-
 	if !ok {
 		return &storage.LocalShortenData{}, storage.ErrNotFound
 	}

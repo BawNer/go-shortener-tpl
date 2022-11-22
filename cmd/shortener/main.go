@@ -41,7 +41,7 @@ func main() {
 
 	r.Post("/api/shorten", h.ShortenerHandler)
 	r.Post("/", h.HandlerPostRequest)
-	r.Get("/{ID}", h.HandlerGetRequest)
+	r.Get("/{ID}", h.HandelGetRequest)
 
 	log.Printf("Server started at %s", app.Config.ServerAddr)
 

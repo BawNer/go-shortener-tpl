@@ -44,7 +44,6 @@ func New(fileName string) (*File, error) {
 
 func (f *File) Init() error {
 	events, err := f.consumer.ReadEventAll()
-
 	if err != nil {
 		return err
 	}

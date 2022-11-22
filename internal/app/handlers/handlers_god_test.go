@@ -13,8 +13,6 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
-var repository storage.Storage
-
 func TestMemStorage_HandlerRequest(t *testing.T) {
 	test := []struct {
 		name       string
@@ -38,6 +36,7 @@ func TestMemStorage_HandlerRequest(t *testing.T) {
 
 	for _, tt := range test {
 		t.Run(tt.name, func(t *testing.T) {
+			var repository storage.Storage
 			request := httptest.NewRequest(tt.method, "http://localhost:8080", nil)
 			if app.Config.FileStoragePath != "" {
 				repository, _ = file.New(app.Config.FileStoragePath)
@@ -49,7 +48,7 @@ func TestMemStorage_HandlerRequest(t *testing.T) {
 			w := httptest.NewRecorder()
 			s := chi.NewRouter()
 			s.Post("/", h.HandlerPostRequest)
-			s.Get("/{ID}", h.HandlerGetRequest)
+			s.Get("/{ID}", h.HandelGetRequest)
 			s.ServeHTTP(w, request)
 			res := w.Result()
 

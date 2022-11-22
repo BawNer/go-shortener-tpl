@@ -14,7 +14,6 @@ import (
 
 func (h *Handler) HandlerPostRequest(w http.ResponseWriter, r *http.Request) {
 	URL, err := io.ReadAll(r.Body)
-
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
@@ -32,7 +31,7 @@ func (h *Handler) HandlerPostRequest(w http.ResponseWriter, r *http.Request) {
 		&evt,
 	)
 	if err != nil {
-		log.Fatal(err.Error())
+		log.Println(err.Error())
 	}
 
 	w.Header().Set("Content-Type", "text/plain")

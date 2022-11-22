@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/BawNer/go-shortener-tpl/internal/app"
+	"github.com/BawNer/go-shortener-tpl/internal/app/storage"
 	"github.com/BawNer/go-shortener-tpl/internal/app/storage/file"
 	"github.com/BawNer/go-shortener-tpl/internal/app/storage/memory"
 	"github.com/go-chi/chi/v5"
@@ -54,6 +55,7 @@ func TestMemStorage_ShortenerHandler(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			var repository storage.Storage
 			dataBody, err := json.Marshal(tt.args.body)
 			if err != nil {
 				t.Fatal(err)
@@ -72,7 +74,6 @@ func TestMemStorage_ShortenerHandler(t *testing.T) {
 			s.Post(tt.args.path, h.ShortenerHandler)
 			s.ServeHTTP(w, request)
 			res := w.Result()
-
 			if res.StatusCode != tt.args.want.status {
 				t.Errorf("Expected status code %d, got %d", tt.args.want.status, w.Code)
 			}
