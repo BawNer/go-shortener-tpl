@@ -18,6 +18,10 @@ type Response struct {
 
 func (h *Handler) UrlsUserHandle(w http.ResponseWriter, r *http.Request) {
 	sign, _ := r.Cookie("sign")
+	if sign == nil {
+		w.WriteHeader(http.StatusNoContent)
+		return
+	}
 	// work with cookie
 	signID, err := storage.CompareSign(sign.Value, app.Config.Secret)
 	if err != nil {
