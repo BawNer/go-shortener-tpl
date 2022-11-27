@@ -18,7 +18,7 @@ type Response struct {
 
 func (h *Handler) UrlsUserHandle(w http.ResponseWriter, r *http.Request) {
 	sign, err := r.Cookie("sign")
-	if err == nil {
+	if err != nil {
 		w.WriteHeader(http.StatusNoContent)
 		return
 	}
