@@ -38,7 +38,7 @@ func (h *Handler) UrlsUserHandle(w http.ResponseWriter, r *http.Request) {
 	)
 	for _, item := range v {
 		response = append(response, Response{
-			ShortURL:    fmt.Sprintf("%s,%s", app.Config.BaseURL, item.ID),
+			ShortURL:    fmt.Sprintf("%s/%s", app.Config.BaseURL, item.ID),
 			OriginalURL: item.URL,
 		})
 	}
