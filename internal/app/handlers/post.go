@@ -12,7 +12,7 @@ import (
 	"github.com/google/uuid"
 )
 
-func (h *Handler) HandlerPostRequest(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) PoorPostRequestHandle(w http.ResponseWriter, r *http.Request) {
 	URL, err := io.ReadAll(r.Body)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -22,16 +22,42 @@ func (h *Handler) HandlerPostRequest(w http.ResponseWriter, r *http.Request) {
 	shr := uuid.New().NodeID()
 	shortURL := hex.EncodeToString(shr)
 
-	evt := storage.LocalShortenData{
-		ID:  shortURL,
-		URL: string(URL),
+	//watch cookie
+	sign, _ := r.Cookie("sign")
+	var signID uint32
+	if sign == nil {
+		// create cookie
+		newSign := storage.CreateSign(shr[:4], app.Config.Secret)
+		cookie := &http.Cookie{
+			Name:   "sign",
+			Value:  newSign,
+			Path:   "/",
+			MaxAge: 360,
+		}
+		http.SetCookie(w, cookie)
+		signID, _ = storage.DecodeSign(newSign)
+	} else {
+		// work with cookie
+		v, err := storage.CompareSign(sign.Value, app.Config.Secret)
+		if err != nil {
+			log.Println(err)
+			v = 0
+		}
+		signID = v
 	}
+
+	evt := storage.LocalShortenData{
+		ID:     shortURL,
+		URL:    string(URL),
+		SignID: signID,
+	}
+
 	err = h.storage.SaveURL(
 		shortURL,
 		&evt,
 	)
 	if err != nil {
-		log.Println(err.Error())
+		log.Fatal(err.Error())
 	}
 
 	w.Header().Set("Content-Type", "text/plain")
