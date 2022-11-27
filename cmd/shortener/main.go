@@ -39,9 +39,10 @@ func main() {
 	r.Use(middlewares.GzipHandle)
 	r.Use(middlewares.Decompress)
 
-	r.Post("/api/shorten", h.ShortenerHandler)
-	r.Post("/", h.HandlerPostRequest)
-	r.Get("/{ID}", h.HandelGetRequest)
+	r.Post("/api/shorten", h.ShortenHandle)
+	r.Get("/api/user/urls", h.UrlsUserHandle)
+	r.Post("/", h.PoorPostRequestHandle)
+	r.Get("/{ID}", h.PoorGetRequestHandle)
 
 	log.Printf("Server started at %s", app.Config.ServerAddr)
 
