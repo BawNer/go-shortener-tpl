@@ -8,7 +8,7 @@ import (
 
 func (h *Handler) PingDBConn(w http.ResponseWriter, r *http.Request) {
 	_, err := postgres.New()
-	if err != nil {
+	if err == nil {
 		w.WriteHeader(http.StatusOK)
 		return
 	}

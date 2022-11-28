@@ -11,6 +11,10 @@ import (
 
 func New() (*pgxpool.Pool, error) {
 	dbpool, err := pgxpool.New(context.Background(), app.Config.DB)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Unable to create connection pool: %v\n", err)
+		os.Exit(1)
+	}
 	defer dbpool.Close()
 
 	var greeting string
