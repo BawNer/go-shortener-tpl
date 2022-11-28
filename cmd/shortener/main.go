@@ -43,6 +43,7 @@ func main() {
 	r.Get("/api/user/urls", h.UrlsUserHandle)
 	r.Post("/", h.PoorPostRequestHandle)
 	r.Get("/{ID}", h.PoorGetRequestHandle)
+	r.Get("/ping", h.PingDBConn)
 
 	log.Printf("Server started at %s", app.Config.ServerAddr)
 
