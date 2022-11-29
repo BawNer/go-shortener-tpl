@@ -21,10 +21,10 @@ func NewConn() (*pgxpool.Pool, error) {
 	query, err := db.Query(context.Background(),
 		"CREATE TABLE IF NOT EXISTS shortened_urls (id varchar(20) PRIMARY KEY, url varchar(40) NOT NULL, signID bigint NOT NULL)",
 	)
-	defer query.Close()
 	if err != nil {
 		log.Fatal(err.Error())
 	}
+	defer query.Close()
 
 	return db, err
 }
@@ -59,6 +59,7 @@ func SelectBySignID(db *pgxpool.Pool, signID uint32) ([]*storage.LocalShortenDat
 	if err != nil {
 		return nil, err
 	}
+	defer query.Close()
 
 	for query.Next() {
 		value, err := query.Values()
@@ -74,8 +75,4 @@ func SelectBySignID(db *pgxpool.Pool, signID uint32) ([]*storage.LocalShortenDat
 	}
 
 	return data, nil
-}
-
-func Close(db *pgxpool.Pool) {
-	db.Close()
 }
