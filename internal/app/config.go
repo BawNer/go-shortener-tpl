@@ -26,8 +26,10 @@ func NewConfigApp() *ConfigApp {
 		defaultBaseURL         = "http://127.0.0.1:8080"
 		defaultFileStoragePath = ""
 		defaultSecret          = "u-nya-nya-mo-ni-ni"
-		defaultDB              = "postgresql://postgres:Ewelli55dxx@localhost:5432"
+		defaultDB              = ""
 	)
+
+	// dbConn = postgresql://postgres:Ewelli55dxx@localhost:5432/shortener
 
 	var (
 		serverAddr      string
