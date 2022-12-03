@@ -19,7 +19,7 @@ func NewConn() (*pgxpool.Pool, error) {
 	}
 	// create table
 	query, err := db.Query(context.Background(),
-		"CREATE TABLE IF NOT EXISTS shortened_urls (id varchar(20) PRIMARY KEY, url varchar(40) NOT NULL, signID bigint NOT NULL)",
+		"CREATE TABLE IF NOT EXISTS shortened_urls (id varchar(20), url varchar(40)  PRIMARY KEY, signID bigint NOT NULL)",
 	)
 	if err != nil {
 		log.Fatal(err.Error())
@@ -35,7 +35,11 @@ func Insert(db *pgxpool.Pool, params *storage.LocalShortenData) error {
 	if err != nil {
 		return err
 	}
-	defer query.Close()
+	query.Close()
+	if query.Err() != nil {
+		// строка уже существует, необходимо вернуть ошибку и уже существующую строку
+		return query.Err()
+	}
 	return nil
 }
 
@@ -46,6 +50,28 @@ func SelectByID(db *pgxpool.Pool, id string) (*storage.LocalShortenData, error) 
 	err := db.QueryRow(context.Background(), "SELECT * FROM shortened_urls WHERE id=$1", id).Scan(&data.ID, &data.URL, &data.SignID)
 	if err != nil {
 		return nil, err
+	}
+
+	return &data, nil
+}
+
+func SelectByField(db *pgxpool.Pool, field string, val string) (*storage.LocalShortenData, error) {
+	var (
+		data storage.LocalShortenData
+	)
+	switch field {
+	case "url":
+		err := db.QueryRow(context.Background(), "SELECT * FROM shortened_urls WHERE url=$1", val).Scan(&data.ID, &data.URL, &data.SignID)
+		if err != nil {
+			return nil, err
+		}
+	case "id":
+		err := db.QueryRow(context.Background(), "SELECT * FROM shortened_urls WHERE id=$1", val).Scan(&data.ID, &data.URL, &data.SignID)
+		if err != nil {
+			return nil, err
+		}
+	default:
+		return &data, nil
 	}
 
 	return &data, nil

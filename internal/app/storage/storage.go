@@ -18,5 +18,6 @@ type Storage interface {
 	SaveURL(id string, data *LocalShortenData) error
 	GetURL(id string) (*LocalShortenData, error)
 	GetAllURL(signID uint32) ([]*LocalShortenData, error)
+	GetByField(field, val string) (*LocalShortenData, error)
 	Init() error
 }

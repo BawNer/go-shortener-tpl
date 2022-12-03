@@ -33,3 +33,7 @@ func (d *DB) GetURL(id string) (*storage.LocalShortenData, error) {
 func (d *DB) GetAllURL(signID uint32) ([]*storage.LocalShortenData, error) {
 	return SelectBySignID(d.repository, signID)
 }
+
+func (d *DB) GetByField(field, val string) (*storage.LocalShortenData, error) {
+	return SelectByField(d.repository, field, val)
+}
