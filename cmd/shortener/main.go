@@ -46,10 +46,11 @@ func main() {
 	r.Use(middlewares.Decompress)
 
 	r.Post("/api/shorten", h.ShortenHandle)
+	r.Post("/api/shorten/batch", h.ShortenBatch)
 	r.Get("/api/user/urls", h.UrlsUserHandle)
-	r.Post("/", h.PoorPostRequestHandle)
-	r.Get("/{ID}", h.PoorGetRequestHandle)
 	r.Get("/ping", h.PingDBConn)
+	r.Get("/{ID}", h.PoorGetRequestHandle)
+	r.Post("/", h.PoorPostRequestHandle)
 
 	log.Printf("Server started at %s", app.Config.ServerAddr)
 
