@@ -33,13 +33,14 @@ func (h *Handler) ShortenBatch(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	//watch cookie
+	sign, _ := r.Cookie("sign")
+	var signID uint32
+
 	for _, item := range data {
 		shr := uuid.New().NodeID()
 		shortURL := hex.EncodeToString(shr)
 
-		//watch cookie
-		sign, _ := r.Cookie("sign")
-		var signID uint32
 		if sign == nil {
 			// create cookie
 			newSign := storage.CreateSign(shr[:4], app.Config.Secret)
