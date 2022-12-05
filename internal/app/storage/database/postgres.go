@@ -19,7 +19,7 @@ func NewConn() (*pgxpool.Pool, error) {
 	}
 	// create table
 	query, err := db.Query(context.Background(),
-		"CREATE TABLE IF NOT EXISTS shortened_urls (id varchar(20), url varchar(40)  PRIMARY KEY, signID bigint NOT NULL)",
+		"CREATE TABLE IF NOT EXISTS shortened_urls (id varchar(20), url varchar(255)  PRIMARY KEY, signID bigint NOT NULL)",
 	)
 	if err != nil {
 		log.Fatal(err.Error())
