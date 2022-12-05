@@ -1,7 +1,9 @@
 package handlers
 
 import (
+	"bytes"
 	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	"io"
 	"log"
@@ -57,7 +59,24 @@ func (h *Handler) PoorPostRequestHandle(w http.ResponseWriter, r *http.Request) 
 		&evt,
 	)
 	if err != nil {
-		log.Fatal(err.Error())
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusConflict)
+		// должны вернуть найденную строку
+		finder, err := h.storage.GetByField("url", string(URL))
+		if err != nil {
+			log.Println(err.Error())
+			return
+		}
+		response := ResponseData{
+			Result: fmt.Sprintf("%s/%s", app.Config.BaseURL, finder.ID),
+		}
+		var buf bytes.Buffer
+		if err := json.NewEncoder(&buf).Encode(&response); err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		_, _ = w.Write(buf.Bytes())
+		return
 	}
 
 	w.Header().Set("Content-Type", "text/plain")
