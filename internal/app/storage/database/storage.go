@@ -2,11 +2,10 @@ package database
 
 import (
 	"github.com/BawNer/go-shortener-tpl/internal/app/storage"
-	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type DB struct {
-	repository *pgxpool.Pool
+	repository *PgDB
 }
 
 func (d *DB) Init() error {
@@ -23,17 +22,17 @@ func New() (*DB, error) {
 }
 
 func (d *DB) SaveURL(id string, data *storage.LocalShortenData) error {
-	return Insert(d.repository, data)
+	return d.repository.Insert(data)
 }
 
 func (d *DB) GetURL(id string) (*storage.LocalShortenData, error) {
-	return SelectByID(d.repository, id)
+	return d.repository.SelectByID(id)
 }
 
-func (d *DB) GetAllURL(signID uint32) ([]*storage.LocalShortenData, error) {
-	return SelectBySignID(d.repository, signID)
+func (d *DB) GetAllURLsForSignID(signID uint32) ([]*storage.LocalShortenData, error) {
+	return d.repository.SelectBySignID(signID)
 }
 
 func (d *DB) GetByField(field, val string) (*storage.LocalShortenData, error) {
-	return SelectByField(d.repository, field, val)
+	return d.repository.SelectByField(field, val)
 }

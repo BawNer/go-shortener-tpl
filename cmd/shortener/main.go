@@ -20,18 +20,28 @@ var repository storage.Storage
 
 func main() {
 	if app.Config.DB == "" {
+		var errConfInit error
 		if app.Config.FileStoragePath != "" {
-			repository, _ = file.New(app.Config.FileStoragePath)
+			repository, errConfInit = file.New(app.Config.FileStoragePath)
+			if errConfInit != nil {
+				log.Fatal(errConfInit.Error())
+			}
 			err := repository.Init()
 			if err != nil {
 				log.Fatal(err.Error())
 			}
 		} else {
-			repository, _ = memory.New()
+			repository, errConfInit = memory.New()
+			if errConfInit != nil {
+				log.Fatal(errConfInit.Error())
+			}
 		}
 	} else {
-		// TODO: Init postgres conn
-		repository, _ = database.New()
+		var errConfInit error
+		if errConfInit != nil {
+			log.Fatal(errConfInit.Error())
+		}
+		repository, errConfInit = database.New()
 	}
 
 	h := handlers.NewHandler(repository)

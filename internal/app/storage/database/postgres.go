@@ -3,7 +3,6 @@ package database
 import (
 	"context"
 	"fmt"
-	"log"
 	"os"
 
 	"github.com/BawNer/go-shortener-tpl/internal/app"
@@ -11,26 +10,30 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-func NewConn() (*pgxpool.Pool, error) {
+type PgDB struct {
+	pool *pgxpool.Pool
+}
+
+func NewConn() (*PgDB, error) {
 	db, err := pgxpool.New(context.Background(), app.Config.DB)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Unable to create connection pool: %v\n", err)
-		os.Exit(1)
+		return &PgDB{}, err
 	}
 	// create table
 	query, err := db.Query(context.Background(),
 		"CREATE TABLE IF NOT EXISTS shortened_urls (id varchar(20), url varchar(255)  PRIMARY KEY, signID bigint NOT NULL)",
 	)
 	if err != nil {
-		log.Fatal(err.Error())
+		return &PgDB{}, err
 	}
 	defer query.Close()
 
-	return db, err
+	return &PgDB{pool: db}, err
 }
 
-func Insert(db *pgxpool.Pool, params *storage.LocalShortenData) error {
-	query, err := db.Query(context.Background(),
+func (d *PgDB) Insert(params *storage.LocalShortenData) error {
+	query, err := d.pool.Query(context.Background(),
 		"INSERT INTO shortened_urls (id, url, signID) VALUES ($1, $2, $3)", params.ID, params.URL, params.SignID)
 	if err != nil {
 		return err
@@ -43,11 +46,11 @@ func Insert(db *pgxpool.Pool, params *storage.LocalShortenData) error {
 	return nil
 }
 
-func SelectByID(db *pgxpool.Pool, id string) (*storage.LocalShortenData, error) {
+func (d *PgDB) SelectByID(id string) (*storage.LocalShortenData, error) {
 	var (
 		data storage.LocalShortenData
 	)
-	err := db.QueryRow(context.Background(), "SELECT * FROM shortened_urls WHERE id=$1", id).Scan(&data.ID, &data.URL, &data.SignID)
+	err := d.pool.QueryRow(context.Background(), "SELECT * FROM shortened_urls WHERE id=$1", id).Scan(&data.ID, &data.URL, &data.SignID)
 	if err != nil {
 		return nil, err
 	}
@@ -55,18 +58,18 @@ func SelectByID(db *pgxpool.Pool, id string) (*storage.LocalShortenData, error) 
 	return &data, nil
 }
 
-func SelectByField(db *pgxpool.Pool, field string, val string) (*storage.LocalShortenData, error) {
+func (d *PgDB) SelectByField(field string, val string) (*storage.LocalShortenData, error) {
 	var (
 		data storage.LocalShortenData
 	)
 	switch field {
 	case "url":
-		err := db.QueryRow(context.Background(), "SELECT * FROM shortened_urls WHERE url=$1", val).Scan(&data.ID, &data.URL, &data.SignID)
+		err := d.pool.QueryRow(context.Background(), "SELECT * FROM shortened_urls WHERE url=$1", val).Scan(&data.ID, &data.URL, &data.SignID)
 		if err != nil {
 			return nil, err
 		}
 	case "id":
-		err := db.QueryRow(context.Background(), "SELECT * FROM shortened_urls WHERE id=$1", val).Scan(&data.ID, &data.URL, &data.SignID)
+		err := d.pool.QueryRow(context.Background(), "SELECT * FROM shortened_urls WHERE id=$1", val).Scan(&data.ID, &data.URL, &data.SignID)
 		if err != nil {
 			return nil, err
 		}
@@ -77,11 +80,11 @@ func SelectByField(db *pgxpool.Pool, field string, val string) (*storage.LocalSh
 	return &data, nil
 }
 
-func SelectBySignID(db *pgxpool.Pool, signID uint32) ([]*storage.LocalShortenData, error) {
+func (d *PgDB) SelectBySignID(signID uint32) ([]*storage.LocalShortenData, error) {
 	var (
 		data []*storage.LocalShortenData
 	)
-	query, err := db.Query(context.Background(), "SELECT * FROM shortened_urls WHERE signID = $1", signID)
+	query, err := d.pool.Query(context.Background(), "SELECT * FROM shortened_urls WHERE signID = $1", signID)
 	if err != nil {
 		return nil, err
 	}

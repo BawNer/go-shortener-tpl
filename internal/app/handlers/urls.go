@@ -30,7 +30,7 @@ func (h *Handler) UrlsUserHandle(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// find all urls
-	v, ok := h.storage.GetAllURL(signID)
+	v, ok := h.storage.GetAllURLsForSignID(signID)
 	if ok != nil {
 		w.WriteHeader(http.StatusNoContent)
 		return

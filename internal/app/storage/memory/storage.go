@@ -63,7 +63,7 @@ func (m *Memory) GetByField(field, val string) (*storage.LocalShortenData, error
 	}
 }
 
-func (m *Memory) GetAllURL(signID uint32) ([]*storage.LocalShortenData, error) {
+func (m *Memory) GetAllURLsForSignID(signID uint32) ([]*storage.LocalShortenData, error) {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
 	var (

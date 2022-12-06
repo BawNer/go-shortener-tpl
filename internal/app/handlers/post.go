@@ -24,7 +24,10 @@ func (h *Handler) PoorPostRequestHandle(w http.ResponseWriter, r *http.Request) 
 
 	//watch cookie
 	sign, _ := r.Cookie("sign")
-	var signID uint32
+	var (
+		signID        uint32
+		signDecodeErr error
+	)
 	if sign == nil {
 		// create cookie
 		newSign := storage.CreateSign(shr[:4], app.Config.Secret)
@@ -35,7 +38,10 @@ func (h *Handler) PoorPostRequestHandle(w http.ResponseWriter, r *http.Request) 
 			MaxAge: 360,
 		}
 		http.SetCookie(w, cookie)
-		signID, _ = storage.DecodeSign(newSign)
+		signID, signDecodeErr = storage.DecodeSign(newSign)
+		if signDecodeErr != nil {
+			log.Println(signDecodeErr.Error())
+		}
 	} else {
 		// work with cookie
 		v, err := storage.CompareSign(sign.Value, app.Config.Secret)
