@@ -38,10 +38,10 @@ func main() {
 		}
 	} else {
 		var errConfInit error
+		repository, errConfInit = database.New()
 		if errConfInit != nil {
 			log.Fatal(errConfInit.Error())
 		}
-		repository, errConfInit = database.New()
 	}
 
 	h := handlers.NewHandler(repository)
