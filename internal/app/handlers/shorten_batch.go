@@ -73,7 +73,9 @@ func (h *Handler) ShortenBatch(w http.ResponseWriter, r *http.Request) {
 			&evt,
 		)
 		if err != nil {
-			log.Fatal(err.Error())
+			log.Println(err.Error())
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
 		}
 
 		response = append(response, ResponseBatch{

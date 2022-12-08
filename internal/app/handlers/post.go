@@ -63,6 +63,7 @@ func (h *Handler) PoorPostRequestHandle(w http.ResponseWriter, r *http.Request) 
 		&evt,
 	)
 	if err != nil {
+		log.Println(err.Error())
 		w.Header().Set("Content-Type", "text/plain")
 		w.WriteHeader(http.StatusConflict)
 		// должны вернуть найденную строку

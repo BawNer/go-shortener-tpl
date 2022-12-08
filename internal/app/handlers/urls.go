@@ -16,7 +16,7 @@ type Response struct {
 	OriginalURL string `json:"original_url"`
 }
 
-func (h *Handler) UrlsUserHandle(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) HandleUserURLs(w http.ResponseWriter, r *http.Request) {
 	sign, err := r.Cookie("sign")
 	if err != nil {
 		w.WriteHeader(http.StatusNoContent)
