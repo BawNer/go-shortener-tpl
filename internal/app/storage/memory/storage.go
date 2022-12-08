@@ -39,3 +39,45 @@ func (m *Memory) GetURL(id string) (*storage.LocalShortenData, error) {
 
 	return v, nil
 }
+
+func (m *Memory) GetByField(field, val string) (*storage.LocalShortenData, error) {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+
+	switch field {
+	case "id":
+		v, ok := m.storage[val]
+		if !ok {
+			return &storage.LocalShortenData{}, storage.ErrNotFound
+		}
+		return v, nil
+	case "url":
+		for _, v := range m.storage {
+			if v.URL == val {
+				return v, nil
+			}
+		}
+		return &storage.LocalShortenData{}, storage.ErrNotFound
+	default:
+		return &storage.LocalShortenData{}, storage.ErrNotFound
+	}
+}
+
+func (m *Memory) GetAllURLsForSignID(signID uint32) ([]*storage.LocalShortenData, error) {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+	var (
+		urls []*storage.LocalShortenData
+	)
+	for _, item := range m.storage {
+		if item.SignID == signID {
+			urls = append(urls, item)
+		}
+	}
+
+	if len(urls) < 1 {
+		return nil, storage.ErrNotFound
+	}
+
+	return urls, nil
+}

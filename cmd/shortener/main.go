@@ -8,6 +8,7 @@ import (
 	"github.com/BawNer/go-shortener-tpl/internal/app"
 	"github.com/BawNer/go-shortener-tpl/internal/app/handlers"
 	"github.com/BawNer/go-shortener-tpl/internal/app/storage"
+	"github.com/BawNer/go-shortener-tpl/internal/app/storage/database"
 	"github.com/BawNer/go-shortener-tpl/internal/app/storage/file"
 	"github.com/BawNer/go-shortener-tpl/internal/app/storage/memory"
 	"github.com/BawNer/go-shortener-tpl/internal/middlewares"
@@ -18,14 +19,29 @@ import (
 var repository storage.Storage
 
 func main() {
-	if app.Config.FileStoragePath != "" {
-		repository, _ = file.New(app.Config.FileStoragePath)
-		err := repository.Init()
-		if err != nil {
-			log.Fatal(err)
+	if app.Config.DSN == "" {
+		var errConfInit error
+		if app.Config.FileStoragePath != "" {
+			repository, errConfInit = file.New(app.Config.FileStoragePath)
+			if errConfInit != nil {
+				log.Fatal(errConfInit.Error())
+			}
+			err := repository.Init()
+			if err != nil {
+				log.Fatal(err.Error())
+			}
+		} else {
+			repository, errConfInit = memory.New()
+			if errConfInit != nil {
+				log.Fatal(errConfInit.Error())
+			}
 		}
 	} else {
-		repository, _ = memory.New()
+		var errConfInit error
+		repository, errConfInit = database.New()
+		if errConfInit != nil {
+			log.Fatal(errConfInit.Error())
+		}
 	}
 
 	h := handlers.NewHandler(repository)
@@ -39,9 +55,12 @@ func main() {
 	r.Use(middlewares.GzipHandle)
 	r.Use(middlewares.Decompress)
 
-	r.Post("/api/shorten", h.ShortenerHandler)
-	r.Post("/", h.HandlerPostRequest)
-	r.Get("/{ID}", h.HandelGetRequest)
+	r.Post("/api/shorten", h.HandleShorten)
+	r.Post("/api/shorten/batch", h.ShortenBatch)
+	r.Get("/api/user/urls", h.HandleUserURLs)
+	r.Get("/ping", h.PingDBConn)
+	r.Get("/{ID}", h.HandleGetRequest)
+	r.Post("/", h.HandlePostRequest)
 
 	log.Printf("Server started at %s", app.Config.ServerAddr)
 

@@ -71,7 +71,7 @@ func TestMemStorage_ShortenerHandler(t *testing.T) {
 			request := httptest.NewRequest(tt.args.method, tt.args.url, bytes.NewReader(dataBody))
 			w := httptest.NewRecorder()
 			s := chi.NewRouter()
-			s.Post(tt.args.path, h.ShortenerHandler)
+			s.Post(tt.args.path, h.HandlePostRequest)
 			s.ServeHTTP(w, request)
 			res := w.Result()
 			if res.StatusCode != tt.args.want.status {

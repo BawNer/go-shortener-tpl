@@ -47,8 +47,8 @@ func TestMemStorage_HandlerRequest(t *testing.T) {
 
 			w := httptest.NewRecorder()
 			s := chi.NewRouter()
-			s.Post("/", h.HandlerPostRequest)
-			s.Get("/{ID}", h.HandelGetRequest)
+			s.Post("/", h.HandlePostRequest)
+			s.Get("/{ID}", h.HandleGetRequest)
 			s.ServeHTTP(w, request)
 			res := w.Result()
 

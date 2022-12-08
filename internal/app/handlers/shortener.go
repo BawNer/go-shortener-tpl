@@ -21,7 +21,7 @@ type ResponseData struct {
 	Result string `json:"result"`
 }
 
-func (h *Handler) ShortenerHandler(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) HandleShorten(w http.ResponseWriter, r *http.Request) {
 	var data RequestData
 
 	if err := json.NewDecoder(r.Body).Decode(&data); err != nil {
@@ -32,9 +32,34 @@ func (h *Handler) ShortenerHandler(w http.ResponseWriter, r *http.Request) {
 	shr := uuid.New().NodeID()
 	shortURL := hex.EncodeToString(shr)
 
+	//watch cookie
+	sign, _ := r.Cookie("sign")
+	var signID uint32
+	if sign == nil {
+		// create cookie
+		newSign := storage.CreateSign(shr[:4], app.Config.Secret)
+		cookie := &http.Cookie{
+			Name:   "sign",
+			Value:  newSign,
+			Path:   "/",
+			MaxAge: 360,
+		}
+		http.SetCookie(w, cookie)
+		signID, _ = storage.DecodeSign(newSign)
+	} else {
+		// work with cookie
+		v, err := storage.CompareSign(sign.Value, app.Config.Secret)
+		if err != nil {
+			log.Println(err)
+			v = 0
+		}
+		signID = v
+	}
+
 	evt := storage.LocalShortenData{
-		ID:  shortURL,
-		URL: data.URL,
+		ID:     shortURL,
+		URL:    data.URL,
+		SignID: signID,
 	}
 
 	err := h.storage.SaveURL(
@@ -42,7 +67,24 @@ func (h *Handler) ShortenerHandler(w http.ResponseWriter, r *http.Request) {
 		&evt,
 	)
 	if err != nil {
-		log.Fatal(err.Error())
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusConflict)
+		// должны вернуть найденную строку
+		finder, err := h.storage.GetByField("url", data.URL)
+		if err != nil {
+			log.Println(err.Error())
+			return
+		}
+		response := ResponseData{
+			Result: fmt.Sprintf("%s/%s", app.Config.BaseURL, finder.ID),
+		}
+		var buf bytes.Buffer
+		if err := json.NewEncoder(&buf).Encode(&response); err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		_, _ = w.Write(buf.Bytes())
+		return
 	}
 
 	response := ResponseData{

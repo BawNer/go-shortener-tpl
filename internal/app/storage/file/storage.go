@@ -72,6 +72,14 @@ func (f *File) GetURL(id string) (*storage.LocalShortenData, error) {
 	return f.memory.GetURL(id)
 }
 
+func (f *File) GetAllURLsForSignID(signID uint32) ([]*storage.LocalShortenData, error) {
+	return f.memory.GetAllURLsForSignID(signID)
+}
+
+func (f *File) GetByField(filed, val string) (*storage.LocalShortenData, error) {
+	return f.memory.GetByField(filed, val)
+}
+
 func (f *File) Close() error {
 	return f.file.Close()
 }

@@ -6,7 +6,7 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
-func (h *Handler) HandelGetRequest(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) HandleGetRequest(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "ID")
 	if id == "" {
 		http.Error(w, "ID is not be empty", http.StatusBadRequest)
