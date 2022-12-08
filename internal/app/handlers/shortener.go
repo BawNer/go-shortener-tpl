@@ -21,7 +21,7 @@ type ResponseData struct {
 	Result string `json:"result"`
 }
 
-func (h *Handler) ShortenHandle(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) HandleShorten(w http.ResponseWriter, r *http.Request) {
 	var data RequestData
 
 	if err := json.NewDecoder(r.Body).Decode(&data); err != nil {

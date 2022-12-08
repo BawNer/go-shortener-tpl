@@ -15,7 +15,7 @@ type PgDB struct {
 }
 
 func NewConn() (*PgDB, error) {
-	db, err := pgxpool.New(context.Background(), app.Config.DB)
+	db, err := pgxpool.New(context.Background(), app.Config.DSN)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Unable to create connection pool: %v\n", err)
 		return &PgDB{}, err

@@ -19,7 +19,7 @@ import (
 var repository storage.Storage
 
 func main() {
-	if app.Config.DB == "" {
+	if app.Config.DSN == "" {
 		var errConfInit error
 		if app.Config.FileStoragePath != "" {
 			repository, errConfInit = file.New(app.Config.FileStoragePath)
@@ -55,12 +55,12 @@ func main() {
 	r.Use(middlewares.GzipHandle)
 	r.Use(middlewares.Decompress)
 
-	r.Post("/api/shorten", h.ShortenHandle)
+	r.Post("/api/shorten", h.HandleShorten)
 	r.Post("/api/shorten/batch", h.ShortenBatch)
 	r.Get("/api/user/urls", h.HandleUserURLs)
 	r.Get("/ping", h.PingDBConn)
-	r.Get("/{ID}", h.PoorGetRequestHandle)
-	r.Post("/", h.PoorPostRequestHandle)
+	r.Get("/{ID}", h.HandleGetRequest)
+	r.Post("/", h.HandlePostRequest)
 
 	log.Printf("Server started at %s", app.Config.ServerAddr)
 

@@ -12,7 +12,7 @@ import (
 	"github.com/google/uuid"
 )
 
-func (h *Handler) PoorPostRequestHandle(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) HandlePostRequest(w http.ResponseWriter, r *http.Request) {
 	URL, err := io.ReadAll(r.Body)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
