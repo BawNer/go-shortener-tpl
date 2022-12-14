@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	"io"
+	"encoding/json"
 	"log"
 	"net/http"
 
@@ -21,8 +21,7 @@ func (h *Handler) HandleDeleteBatchUrls(w http.ResponseWriter, r *http.Request) 
 		signID uint32
 		urlIDs []string
 	)
-	data, err := io.ReadAll(r.Body)
-	if err != nil {
+	if err := json.NewDecoder(r.Body).Decode(&urlIDs); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -45,11 +44,8 @@ func (h *Handler) HandleDeleteBatchUrls(w http.ResponseWriter, r *http.Request) 
 	}
 
 	// main
-	batchSize = len(string(data))
+	batchSize = len(urlIDs)
 	inputCh := make(chan dataForWorker, batchSize)
-	for _, urlID := range data {
-		urlIDs = append(urlIDs, string(urlID))
-	}
 
 	go h.worker(inputCh) // init go routine
 
