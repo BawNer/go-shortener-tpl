@@ -18,6 +18,10 @@ func (h *Handler) HandleGetRequest(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusNotFound)
 		return
 	}
+	if columns.IsDeleted {
+		w.WriteHeader(http.StatusGone)
+		return
+	}
 
 	w.Header().Set("Location", columns.URL)
 

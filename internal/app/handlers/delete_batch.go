@@ -58,7 +58,6 @@ func (h *Handler) HandleDeleteBatchUrls(w http.ResponseWriter, r *http.Request) 
 
 	w.WriteHeader(http.StatusAccepted)
 	time.Sleep(time.Second)
-	return
 }
 
 func putJobs(inputCh chan<- dataForWorker, urlIDs []string, signID uint32) {
