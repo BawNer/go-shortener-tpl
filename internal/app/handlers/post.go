@@ -15,6 +15,7 @@ import (
 func (h *Handler) HandlePostRequest(w http.ResponseWriter, r *http.Request) {
 	URL, err := io.ReadAll(r.Body)
 	if err != nil {
+		log.Println(err)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -59,13 +60,14 @@ func (h *Handler) HandlePostRequest(w http.ResponseWriter, r *http.Request) {
 		IsDeleted: false,
 	}
 
+	w.Header().Set("Content-Type", "text/plain")
+
 	err = h.storage.SaveURL(
 		shortURL,
 		&evt,
 	)
 	if err != nil {
 		log.Println(err.Error())
-		w.Header().Set("Content-Type", "text/plain")
 		w.WriteHeader(http.StatusConflict)
 		// должны вернуть найденную строку
 		finder, err := h.storage.GetByField("url", string(URL))
@@ -76,8 +78,6 @@ func (h *Handler) HandlePostRequest(w http.ResponseWriter, r *http.Request) {
 		_, _ = w.Write([]byte(fmt.Sprintf("%s/%s", app.Config.BaseURL, finder.ID)))
 		return
 	}
-
-	w.Header().Set("Content-Type", "text/plain")
 
 	w.WriteHeader(http.StatusCreated)
 

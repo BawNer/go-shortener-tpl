@@ -3,6 +3,7 @@ package database
 import (
 	"context"
 	"fmt"
+	"log"
 	"os"
 
 	"github.com/BawNer/go-shortener-tpl/internal/app"
@@ -37,10 +38,12 @@ func (d *PgDB) Insert(params *storage.LocalShortenData) error {
 	query, err := d.pool.Query(context.Background(),
 		"INSERT INTO shortened_urls (id, url, signID, isDeleted) VALUES ($1, $2, $3, $4)", params.ID, params.URL, params.SignID, params.IsDeleted)
 	if err != nil {
+		log.Println(err)
 		return err
 	}
 	query.Close()
 	if query.Err() != nil {
+		log.Println(err)
 		// строка уже существует, необходимо вернуть ошибку и уже существующую строку
 		return query.Err()
 	}
@@ -112,10 +115,12 @@ func (d *PgDB) DeleteURL(id string, value bool, signID uint32) error {
 	query, err := d.pool.Query(context.Background(), "UPDATE shortened_urls SET isDeleted=$1 WHERE id = $2 AND signID = $3",
 		value, id, signID)
 	if err != nil {
+		log.Println(err)
 		return err
 	}
 	query.Close()
 	if query.Err() != nil {
+		log.Println(err)
 		return query.Err()
 	}
 
