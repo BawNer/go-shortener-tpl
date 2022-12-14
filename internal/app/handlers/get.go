@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"log"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -15,6 +16,7 @@ func (h *Handler) HandleGetRequest(w http.ResponseWriter, r *http.Request) {
 
 	columns, err := h.storage.GetURL(id)
 	if err != nil {
+		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusNotFound)
 		return
 	}
