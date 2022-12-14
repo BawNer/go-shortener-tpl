@@ -80,6 +80,10 @@ func (f *File) GetByField(filed, val string) (*storage.LocalShortenData, error) 
 	return f.memory.GetByField(filed, val)
 }
 
+func (f *File) DeleteURL(id string, val bool, signID uint32) error {
+	return f.memory.DeleteURL(id, val, signID)
+}
+
 func (f *File) Close() error {
 	return f.file.Close()
 }

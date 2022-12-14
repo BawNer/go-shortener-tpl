@@ -22,7 +22,8 @@ func NewConn() (*PgDB, error) {
 	}
 	// create table
 	query, err := db.Query(context.Background(),
-		"CREATE TABLE IF NOT EXISTS shortened_urls (id varchar(20), url varchar(255)  PRIMARY KEY, signID bigint NOT NULL)",
+		"CREATE TABLE IF NOT EXISTS shortened_urls (id varchar(20), url varchar(255)  PRIMARY KEY,"+
+			" signID bigint NOT NULL, isDeleted BOOLEAN NOT NULL DEFAULT FALSE)",
 	)
 	if err != nil {
 		return &PgDB{}, err
@@ -104,4 +105,18 @@ func (d *PgDB) SelectBySignID(signID uint32) ([]*storage.LocalShortenData, error
 	}
 
 	return data, nil
+}
+
+func (d *PgDB) DeleteURL(id string, value bool, signID uint32) error {
+	query, err := d.pool.Query(context.Background(), "UPDATE shortened_urls SET isDeleted=$1 WHERE id = $2 AND signID = $3",
+		value, id, signID)
+	if err != nil {
+		return err
+	}
+	query.Close()
+	if query.Err() != nil {
+		return query.Err()
+	}
+
+	return nil
 }

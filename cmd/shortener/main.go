@@ -55,12 +55,15 @@ func main() {
 	r.Use(middlewares.GzipHandle)
 	r.Use(middlewares.Decompress)
 
-	r.Post("/api/shorten", h.HandleShorten)
-	r.Post("/api/shorten/batch", h.ShortenBatch)
 	r.Get("/api/user/urls", h.HandleUserURLs)
 	r.Get("/ping", h.PingDBConn)
 	r.Get("/{ID}", h.HandleGetRequest)
+
+	r.Post("/api/shorten", h.HandleShorten)
+	r.Post("/api/shorten/batch", h.ShortenBatch)
 	r.Post("/", h.HandlePostRequest)
+
+	r.Delete("/api/user/urls", h.HandleDeleteBatchUrls)
 
 	log.Printf("Server started at %s", app.Config.ServerAddr)
 
