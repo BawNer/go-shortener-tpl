@@ -68,6 +68,7 @@ func getFilledChan(inputCh <-chan dataForWorker, size int) <-chan dataForWorker 
 	resultCh := make(chan dataForWorker, size)
 	for i := 0; i < size; i++ {
 		job, ok := <-inputCh
+		log.Printf("Chan is empty, %v", job)
 		if !ok {
 			break
 		}
@@ -97,6 +98,7 @@ func (h *Handler) writeToDB(ids []string, signID uint32) error {
 	for _, id := range ids {
 		err := h.storage.DeleteURL(id, true, signID)
 		if err != nil {
+			log.Println(err)
 			return err
 		}
 	}
