@@ -48,7 +48,7 @@ func (h *Handler) ShortenBatch(w http.ResponseWriter, r *http.Request) {
 				Name:   "sign",
 				Value:  newSign,
 				Path:   "/",
-				MaxAge: 360,
+				MaxAge: 3600,
 			}
 			http.SetCookie(w, cookie)
 			signID, _ = storage.DecodeSign(newSign)
