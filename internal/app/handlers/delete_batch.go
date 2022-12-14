@@ -47,9 +47,9 @@ func (h *Handler) HandleDeleteBatchUrls(w http.ResponseWriter, r *http.Request) 
 	batchSize = len(urlIDs)
 	inputCh := make(chan dataForWorker, batchSize)
 
-	go h.worker(inputCh) // init go routine
-
 	go putJobs(inputCh, urlIDs, signID)
+
+	go h.worker(inputCh) // init go routine
 
 	w.WriteHeader(http.StatusAccepted)
 }
