@@ -35,7 +35,7 @@ func NewConn() (*PgDB, error) {
 
 func (d *PgDB) Insert(params *storage.LocalShortenData) error {
 	query, err := d.pool.Query(context.Background(),
-		"INSERT INTO shortened_urls (id, url, signID) VALUES ($1, $2, $3)", params.ID, params.URL, params.SignID)
+		"INSERT INTO shortened_urls (id, url, signID, isDeleted) VALUES ($1, $2, $3, $4)", params.ID, params.URL, params.SignID, params.IsDeleted)
 	if err != nil {
 		return err
 	}
@@ -51,7 +51,7 @@ func (d *PgDB) SelectByID(id string) (*storage.LocalShortenData, error) {
 	var (
 		data storage.LocalShortenData
 	)
-	err := d.pool.QueryRow(context.Background(), "SELECT * FROM shortened_urls WHERE id=$1", id).Scan(&data.ID, &data.URL, &data.SignID)
+	err := d.pool.QueryRow(context.Background(), "SELECT * FROM shortened_urls WHERE id=$1", id).Scan(&data.ID, &data.URL, &data.SignID, &data.IsDeleted)
 	if err != nil {
 		return nil, err
 	}
@@ -65,12 +65,12 @@ func (d *PgDB) SelectByField(field string, val string) (*storage.LocalShortenDat
 	)
 	switch field {
 	case "url":
-		err := d.pool.QueryRow(context.Background(), "SELECT * FROM shortened_urls WHERE url=$1", val).Scan(&data.ID, &data.URL, &data.SignID)
+		err := d.pool.QueryRow(context.Background(), "SELECT * FROM shortened_urls WHERE url=$1", val).Scan(&data.ID, &data.URL, &data.SignID, &data.IsDeleted)
 		if err != nil {
 			return nil, err
 		}
 	case "id":
-		err := d.pool.QueryRow(context.Background(), "SELECT * FROM shortened_urls WHERE id=$1", val).Scan(&data.ID, &data.URL, &data.SignID)
+		err := d.pool.QueryRow(context.Background(), "SELECT * FROM shortened_urls WHERE id=$1", val).Scan(&data.ID, &data.URL, &data.SignID, &data.IsDeleted)
 		if err != nil {
 			return nil, err
 		}
