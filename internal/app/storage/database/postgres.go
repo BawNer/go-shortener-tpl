@@ -98,9 +98,10 @@ func (d *PgDB) SelectBySignID(signID uint32) ([]*storage.LocalShortenData, error
 		}
 
 		data = append(data, &storage.LocalShortenData{
-			ID:     value[0].(string),
-			URL:    value[1].(string),
-			SignID: uint32(value[2].(int64)),
+			ID:        value[0].(string),
+			URL:       value[1].(string),
+			SignID:    uint32(value[2].(int64)),
+			IsDeleted: value[3].(bool),
 		})
 	}
 
