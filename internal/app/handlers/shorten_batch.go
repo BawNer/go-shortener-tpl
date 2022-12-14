@@ -63,9 +63,10 @@ func (h *Handler) ShortenBatch(w http.ResponseWriter, r *http.Request) {
 		}
 
 		evt := storage.LocalShortenData{
-			ID:     shortURL,
-			URL:    item.OriginalURL,
-			SignID: signID,
+			ID:        shortURL,
+			URL:       item.OriginalURL,
+			SignID:    signID,
+			IsDeleted: false,
 		}
 
 		err := h.storage.SaveURL(

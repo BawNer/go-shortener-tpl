@@ -57,9 +57,10 @@ func (h *Handler) HandleShorten(w http.ResponseWriter, r *http.Request) {
 	}
 
 	evt := storage.LocalShortenData{
-		ID:     shortURL,
-		URL:    data.URL,
-		SignID: signID,
+		ID:        shortURL,
+		URL:       data.URL,
+		SignID:    signID,
+		IsDeleted: false,
 	}
 
 	err := h.storage.SaveURL(

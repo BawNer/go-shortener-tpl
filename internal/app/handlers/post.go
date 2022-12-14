@@ -53,9 +53,10 @@ func (h *Handler) HandlePostRequest(w http.ResponseWriter, r *http.Request) {
 	}
 
 	evt := storage.LocalShortenData{
-		ID:     shortURL,
-		URL:    string(URL),
-		SignID: signID,
+		ID:        shortURL,
+		URL:       string(URL),
+		SignID:    signID,
+		IsDeleted: false,
 	}
 
 	err = h.storage.SaveURL(
