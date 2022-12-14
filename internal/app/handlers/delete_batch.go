@@ -4,7 +4,6 @@ import (
 	"io"
 	"log"
 	"net/http"
-	"time"
 
 	"github.com/BawNer/go-shortener-tpl/internal/app"
 	"github.com/BawNer/go-shortener-tpl/internal/app/storage"
@@ -57,7 +56,6 @@ func (h *Handler) HandleDeleteBatchUrls(w http.ResponseWriter, r *http.Request) 
 	go putJobs(inputCh, urlIDs, signID)
 
 	w.WriteHeader(http.StatusAccepted)
-	time.Sleep(time.Second)
 }
 
 func putJobs(inputCh chan<- dataForWorker, urlIDs []string, signID uint32) {
