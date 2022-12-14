@@ -68,7 +68,7 @@ func getFilledChan(inputCh <-chan dataForWorker, size int) <-chan dataForWorker 
 	resultCh := make(chan dataForWorker, size)
 	for i := 0; i < size; i++ {
 		job, ok := <-inputCh
-		log.Printf("Chan is empty, %v", job)
+		log.Printf("Chan contains, %v", job)
 		if !ok {
 			break
 		}
