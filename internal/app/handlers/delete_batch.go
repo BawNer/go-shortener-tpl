@@ -96,6 +96,7 @@ func (h *Handler) worker(inputCh <-chan dataForWorker) {
 
 func (h *Handler) writeToDB(ids []string, signID uint32) error {
 	for _, id := range ids {
+		log.Printf("url id to delete is %s", id)
 		err := h.storage.DeleteURL(id, true, signID)
 		if err != nil {
 			log.Println(err)
