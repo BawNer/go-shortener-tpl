@@ -22,6 +22,10 @@ type ResponseData struct {
 }
 
 func (h *Handler) HandleShorten(w http.ResponseWriter, r *http.Request) {
+	reqID := uuid.New().String()
+
+	log.Printf("reqID=%s handle request HandleShorten", reqID)
+
 	var data RequestData
 
 	if err := json.NewDecoder(r.Body).Decode(&data); err != nil {
@@ -36,8 +40,10 @@ func (h *Handler) HandleShorten(w http.ResponseWriter, r *http.Request) {
 	sign, _ := r.Cookie("sign")
 	var signID uint32
 	if sign == nil {
+		log.Printf("reqID=%s sign==nil, start create sign", reqID)
 		// create cookie
 		newSign := storage.CreateSign(shr[:4], app.Config.Secret)
+		log.Printf("reqID=%s new sign created", reqID)
 		cookie := &http.Cookie{
 			Name:   "sign",
 			Value:  newSign,
@@ -47,12 +53,14 @@ func (h *Handler) HandleShorten(w http.ResponseWriter, r *http.Request) {
 		http.SetCookie(w, cookie)
 		signID, _ = storage.DecodeSign(newSign)
 	} else {
+		log.Printf("reqID=%s start compareSign", reqID)
 		// work with cookie
 		v, err := storage.CompareSign(sign.Value, app.Config.Secret)
 		if err != nil {
-			log.Println(err)
+			log.Printf("reqID=%s error compareSign %v", reqID, err)
 			v = 0
 		}
+		log.Printf("reqID=%s end compareSign", reqID)
 		signID = v
 	}
 
@@ -63,15 +71,22 @@ func (h *Handler) HandleShorten(w http.ResponseWriter, r *http.Request) {
 		IsDeleted: false,
 	}
 
+	log.Printf("reqID=%s start save url to storage", reqID)
+
 	err := h.storage.SaveURL(
 		shortURL,
 		&evt,
 	)
+
+	log.Printf("reqID=%s end save url to storage, err is %v", reqID, err)
+
 	if err != nil {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusConflict)
 		// должны вернуть найденную строку
+		log.Printf("reqID=%s SaveURL error, start GetByField", reqID)
 		finder, err := h.storage.GetByField("url", data.URL)
+		log.Printf("reqID=%s SaveURL error, end GetByField, err is %v", reqID, err)
 		if err != nil {
 			log.Println(err.Error())
 			return
