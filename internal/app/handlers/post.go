@@ -13,9 +13,12 @@ import (
 )
 
 func (h *Handler) HandlePostRequest(w http.ResponseWriter, r *http.Request) {
+	reqID := uuid.New().String()
+	log.Printf("reqID=%s handle request HandleShorten", reqID)
+
 	URL, err := io.ReadAll(r.Body)
 	if err != nil {
-		log.Println(err)
+		log.Printf("ReqID=%s, can't read body! Err: %v", reqID, err)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -62,18 +65,21 @@ func (h *Handler) HandlePostRequest(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "text/plain")
 
+	log.Printf("ReqID=%s, Start save url", reqID)
 	err = h.storage.SaveURL(
 		shortURL,
 		&evt,
 	)
 	if err != nil {
-		log.Println(err.Error())
+		log.Printf("ReqID=%s, Save url with err: %v", reqID, err)
 		w.WriteHeader(http.StatusConflict)
 		// должны вернуть найденную строку
+		log.Printf("ReqID=%s, Start find exist url", reqID)
 		finder, err := h.storage.GetByField("url", string(URL))
+		log.Printf("ReqID=%s, Start Finded url is %v", reqID, finder)
 		if err != nil {
-			log.Println(err.Error())
-			return
+			log.Printf("ReqID=%s, Err when find exist url: %v", reqID, err)
+			w.WriteHeader(http.StatusInternalServerError)
 		}
 		_, _ = w.Write([]byte(fmt.Sprintf("%s/%s", app.Config.BaseURL, finder.ID)))
 		return
