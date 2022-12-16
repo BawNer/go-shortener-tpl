@@ -14,7 +14,7 @@ import (
 
 func (h *Handler) HandlePostRequest(w http.ResponseWriter, r *http.Request) {
 	reqID := uuid.New().String()
-	log.Printf("reqID=%s handle request HandleShorten", reqID)
+	log.Printf("reqID=%s handle request HandlePostRequest", reqID)
 
 	URL, err := io.ReadAll(r.Body)
 	if err != nil {
@@ -84,6 +84,7 @@ func (h *Handler) HandlePostRequest(w http.ResponseWriter, r *http.Request) {
 		_, _ = w.Write([]byte(fmt.Sprintf("%s/%s", app.Config.BaseURL, finder.ID)))
 		return
 	}
+	log.Printf("ReqID=%s, URL Saved success!", reqID)
 
 	w.WriteHeader(http.StatusCreated)
 
