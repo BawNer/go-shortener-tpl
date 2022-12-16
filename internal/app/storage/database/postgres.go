@@ -35,18 +35,23 @@ func NewConn() (*PgDB, error) {
 }
 
 func (d *PgDB) Insert(params *storage.LocalShortenData) error {
+	log.Printf("Отправляем данные в бд %v", params)
 	query, err := d.pool.Query(context.Background(),
 		"INSERT INTO shortened_urls (id, url, signID, isDeleted) VALUES ($1, $2, $3, $4)", params.ID, params.URL, params.SignID, params.IsDeleted)
 	if err != nil {
 		log.Println(err)
 		return err
 	}
+	log.Printf("Данные отпавлены в бд %v", params)
+
+	log.Println("Закрываем запрос")
 	query.Close()
 	if query.Err() != nil {
 		log.Println(err)
 		// строка уже существует, необходимо вернуть ошибку и уже существующую строку
 		return query.Err()
 	}
+	log.Println("Соединение закрыто!")
 	return nil
 }
 
