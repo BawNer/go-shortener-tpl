@@ -16,8 +16,6 @@ type dataForWorker struct {
 	SignID uint32
 }
 
-var batchSize int
-
 func (h *Handler) HandleDeleteBatchUrls(w http.ResponseWriter, r *http.Request) {
 	var (
 		signID uint32
@@ -57,7 +55,7 @@ func (h *Handler) HandleDeleteBatchUrls(w http.ResponseWriter, r *http.Request) 
 
 	// main
 	log.Printf("reqID=%s Получаем размера буфера", reqID)
-	batchSize = len(urlIDs)
+	batchSize := len(urlIDs)
 	log.Printf("reqID=%s Буфер установлен на %d", reqID, batchSize)
 
 	log.Printf("reqID=%s Создаем канал с буфером %d", reqID, batchSize)
@@ -106,7 +104,7 @@ func (h *Handler) worker(inputCh <-chan dataForWorker) {
 	log.Printf("Воркер запущен!")
 	for {
 		log.Printf("Получаем заполненный канал")
-		filledChan := getFilledChan(inputCh, batchSize)
+		filledChan := getFilledChan(inputCh, len(inputCh))
 		log.Printf("генерируем батч")
 		batches := map[uint32][]string{}
 		log.Printf("Наполняем джобу")
