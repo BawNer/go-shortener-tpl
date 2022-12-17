@@ -95,6 +95,8 @@ func getFilledChan(inputCh <-chan dataForWorker, size int) <-chan dataForWorker 
 			break
 		}
 		resultCh <- job
+
+		time.Sleep(time.Second) // нужно ожидать корректно
 	}
 	log.Printf("Закрываем канал")
 	close(resultCh)
@@ -121,8 +123,6 @@ func (h *Handler) worker(inputCh <-chan dataForWorker) {
 			}
 		}
 	}
-
-	time.Sleep(time.Second) // нужно ожидать корректно
 }
 
 func (h *Handler) writeToDB(ids []string, signID uint32) error {
