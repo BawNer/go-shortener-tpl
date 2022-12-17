@@ -119,7 +119,7 @@ func (h *Handler) worker(inputCh <-chan dataForWorker) {
 		for signID, ids := range batches {
 			err := h.writeToDB(ids, signID)
 			if err != nil {
-				log.Println(err.Error())
+				log.Printf("Произошла ошибка при отпрвке в бд  %v", err)
 			}
 		}
 	}
