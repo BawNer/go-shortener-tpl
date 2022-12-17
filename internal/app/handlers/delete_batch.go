@@ -72,8 +72,6 @@ func (h *Handler) HandleDeleteBatchUrls(w http.ResponseWriter, r *http.Request) 
 
 	log.Printf("reqID=%s Отдаем ответ со статусом 202", reqID)
 	w.WriteHeader(http.StatusAccepted)
-
-	time.Sleep(time.Second) // нужно ожидать корректно
 }
 
 func putJobs(inputCh chan<- dataForWorker, urlIDs []string, signID uint32) {
@@ -123,6 +121,8 @@ func (h *Handler) worker(inputCh <-chan dataForWorker) {
 			}
 		}
 	}
+
+	time.Sleep(time.Second) // нужно ожидать корректно
 }
 
 func (h *Handler) writeToDB(ids []string, signID uint32) error {
