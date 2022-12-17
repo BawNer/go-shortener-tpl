@@ -95,8 +95,6 @@ func getFilledChan(inputCh <-chan dataForWorker, size int) <-chan dataForWorker 
 			break
 		}
 		resultCh <- job
-
-		time.Sleep(time.Second) // нужно ожидать корректно
 	}
 	log.Printf("Закрываем канал")
 	close(resultCh)
@@ -122,6 +120,8 @@ func (h *Handler) worker(inputCh <-chan dataForWorker) {
 				log.Printf("Произошла ошибка при отпрвке в бд  %v", err)
 			}
 		}
+
+		time.Sleep(time.Second) // нужно ожидать корректно
 	}
 }
 
