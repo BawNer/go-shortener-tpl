@@ -120,6 +120,7 @@ func (h *Handler) worker(inputCh <-chan dataForWorker) {
 				log.Printf("Произошла ошибка при отпрвке в бд  %v", err.Error())
 			}
 		}
+		time.Sleep(time.Second) // нужно ожидать корректно
 	}
 }
 
@@ -131,7 +132,6 @@ func (h *Handler) writeToDB(ids []string, signID uint32) error {
 			log.Println(err)
 			return err
 		}
-		time.Sleep(time.Second) // нужно ожидать корректно
 	}
 
 	return nil
