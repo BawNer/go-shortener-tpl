@@ -70,6 +70,7 @@ func (h *Handler) HandleDeleteBatchUrls(w http.ResponseWriter, r *http.Request) 
 	log.Printf("reqID=%s Запускаем рутину на удаление", reqID)
 	go h.worker(inputCh) // init go routine
 
+	time.Sleep(time.Second) // нужно ожидать корректно
 	log.Printf("reqID=%s Отдаем ответ со статусом 202", reqID)
 	w.WriteHeader(http.StatusAccepted)
 }
@@ -120,8 +121,6 @@ func (h *Handler) worker(inputCh <-chan dataForWorker) {
 				log.Printf("Произошла ошибка при отпрвке в бд  %v", err)
 			}
 		}
-
-		time.Sleep(time.Second) // нужно ожидать корректно
 	}
 }
 
