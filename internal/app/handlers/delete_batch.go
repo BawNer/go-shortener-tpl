@@ -70,7 +70,6 @@ func (h *Handler) HandleDeleteBatchUrls(w http.ResponseWriter, r *http.Request) 
 	log.Printf("reqID=%s Запускаем рутину на удаление", reqID)
 	go h.worker(inputCh) // init go routine
 
-	time.Sleep(time.Second) // нужно ожидать корректно
 	log.Printf("reqID=%s Отдаем ответ со статусом 202", reqID)
 	w.WriteHeader(http.StatusAccepted)
 }
@@ -96,6 +95,8 @@ func getFilledChan(inputCh <-chan dataForWorker, size int) <-chan dataForWorker 
 			break
 		}
 		resultCh <- job
+
+		time.Sleep(time.Second) // нужно ожидать корректно
 	}
 	log.Printf("Закрываем канал")
 	close(resultCh)
@@ -118,7 +119,7 @@ func (h *Handler) worker(inputCh <-chan dataForWorker) {
 		for signID, ids := range batches {
 			err := h.writeToDB(ids, signID)
 			if err != nil {
-				log.Printf("Произошла ошибка при отпрвке в бд  %v", err)
+				log.Printf("Произошла ошибка при отпрвке в бд  %v", err.Error())
 			}
 		}
 	}
