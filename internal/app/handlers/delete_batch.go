@@ -83,6 +83,9 @@ func putJobs(inputCh chan<- dataForWorker, urlIDs []string, signID uint32) {
 
 func getFilledChan(inputCh <-chan dataForWorker, size int) <-chan dataForWorker {
 	log.Printf("Создаем канал с структурой dataForWorker и буфером %v", size)
+	if size < 1 {
+		size = 1
+	}
 	resultCh := make(chan dataForWorker, size)
 	for i := 0; i < size; i++ {
 		job, ok := <-inputCh
