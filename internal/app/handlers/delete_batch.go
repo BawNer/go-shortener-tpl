@@ -103,11 +103,7 @@ func (h *Handler) worker(inputCh <-chan dataForWorker) {
 	log.Printf("Воркер запущен!")
 	for {
 		log.Printf("Получаем заполненный канал")
-		size := 1
-		if len(inputCh) > 0 {
-			size = len(inputCh)
-		}
-		filledChan := getFilledChan(inputCh, size)
+		filledChan := getFilledChan(inputCh, 1)
 		log.Printf("генерируем батч")
 		batches := map[uint32][]string{}
 		log.Printf("Наполняем джобу")
