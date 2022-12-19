@@ -66,10 +66,12 @@ func (h *Handler) HandleDeleteBatchUrls(w http.ResponseWriter, r *http.Request) 
 	go putJobs(inputCh, urlIDs, signID)
 
 	log.Printf("reqID=%s Запускаем рутину на удаление", reqID)
-	go h.worker(inputCh)    // init go routine
-	time.Sleep(time.Second) // нужно ожидать корректно
+	go h.worker(inputCh) // init go routine
+
 	log.Printf("reqID=%s Отдаем ответ со статусом 202", reqID)
 	w.WriteHeader(http.StatusAccepted)
+
+	time.Sleep(10 * time.Second) // нужно ожидать корректно
 }
 
 func putJobs(inputCh chan<- dataForWorker, urlIDs []string, signID uint32) {
