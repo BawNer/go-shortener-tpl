@@ -78,6 +78,7 @@ func (h *Handler) Worker(inputCh <-chan DataForWorker) {
 		if err != nil {
 			log.Printf("Произошла ошибка при отпрвке в бд  %v", err.Error())
 		}
+		h.wg.Done()
 	}
 	h.wg.Wait()
 }
