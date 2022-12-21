@@ -72,6 +72,7 @@ func putJobs(inputCh chan<- DataForWorker, urlIDs []string, signID uint32) {
 }
 
 func (h *Handler) Worker(inputCh <-chan DataForWorker) {
+	h.wg.Add(1)
 	log.Printf("Воркер запущен!")
 	for {
 		log.Printf("генерируем батч")
@@ -87,6 +88,7 @@ func (h *Handler) Worker(inputCh <-chan DataForWorker) {
 				log.Printf("Произошла ошибка при отпрвке в бд  %v", err.Error())
 			}
 		}
+		h.wg.Done()
 	}
 }
 

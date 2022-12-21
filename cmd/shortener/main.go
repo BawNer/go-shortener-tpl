@@ -48,6 +48,7 @@ func main() {
 	h := handlers.NewHandler(repository, inputCh)
 
 	for i := 0; i < app.Config.Workers; i++ {
+
 		go h.Worker(inputCh) // init go routine
 	}
 
