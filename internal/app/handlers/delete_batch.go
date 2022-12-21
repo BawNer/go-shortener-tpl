@@ -73,34 +73,24 @@ func putJobs(inputCh chan<- DataForWorker, urlIDs []string, signID uint32) {
 
 func (h *Handler) Worker(inputCh <-chan DataForWorker) {
 	h.wg.Add(1)
-	log.Printf("Воркер запущен!")
-	for {
-		log.Printf("генерируем батч")
-		batches := map[uint32][]string{}
-		log.Printf("Наполняем джобу")
-		for job := range inputCh {
-			batches[job.SignID] = append(batches[job.SignID], job.ID)
-		}
-		log.Printf("Отправляем данные в БД!")
-		for signID, ids := range batches {
-			err := h.writeToDB(ids, signID)
-			if err != nil {
-				log.Printf("Произошла ошибка при отпрвке в бд  %v", err.Error())
-			}
-		}
-		h.wg.Done()
-	}
-}
-
-func (h *Handler) writeToDB(ids []string, signID uint32) error {
-	for _, id := range ids {
-		log.Printf("url id to delete is %s", id)
-		err := h.storage.DeleteURL(id, true, signID)
+	for data := range inputCh {
+		err := h.storage.DeleteURL(data.ID, true, data.SignID)
 		if err != nil {
-			log.Println(err)
-			return err
+			log.Printf("Произошла ошибка при отпрвке в бд  %v", err.Error())
 		}
 	}
-
-	return nil
+	h.wg.Wait()
 }
+
+//func (h *Handler) writeToDB(ids []string, signID uint32) error {
+//	for _, id := range ids {
+//		log.Printf("url id to delete is %s", id)
+//		err := h.storage.DeleteURL(id, true, signID)
+//		if err != nil {
+//			log.Println(err)
+//			return err
+//		}
+//	}
+//
+//	return nil
+//}
