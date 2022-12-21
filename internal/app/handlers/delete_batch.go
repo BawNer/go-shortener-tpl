@@ -10,7 +10,7 @@ import (
 	"github.com/google/uuid"
 )
 
-type dataForWorker struct {
+type DataForWorker struct {
 	ID     string
 	SignID uint32
 }
@@ -54,36 +54,33 @@ func (h *Handler) HandleDeleteBatchUrls(w http.ResponseWriter, r *http.Request) 
 
 	// main
 	log.Printf("reqID=%s Получаем размера буфера", reqID)
-	batchSize := len(urlIDs)
+	batchSize := 100
 	log.Printf("reqID=%s Буфер установлен на %d", reqID, batchSize)
 
 	log.Printf("reqID=%s Создаем канал с буфером %d", reqID, batchSize)
-	inputCh := make(chan dataForWorker, batchSize)
+	inputCh := make(chan DataForWorker, batchSize)
 	log.Printf("reqID=%s Канал с буфером %d создан!", reqID, batchSize)
 
 	log.Printf("reqID=%s Складируем в канал ID", reqID)
 	go putJobs(inputCh, urlIDs, signID)
 
-	log.Printf("reqID=%s Запускаем рутину на удаление", reqID)
-	go h.worker(inputCh) // init go routine
-
 	log.Printf("reqID=%s Отдаем ответ со статусом 202", reqID)
 	w.WriteHeader(http.StatusAccepted)
 }
 
-func putJobs(inputCh chan<- dataForWorker, urlIDs []string, signID uint32) {
+func putJobs(inputCh chan<- DataForWorker, urlIDs []string, signID uint32) {
 	// складируем данные в канал
 	for _, urlID := range urlIDs {
-		inputCh <- dataForWorker{
+		inputCh <- DataForWorker{
 			ID:     urlID,
 			SignID: signID,
 		}
 	}
 }
 
-func getFilledChan(inputCh <-chan dataForWorker, size int) <-chan dataForWorker {
-	log.Printf("Создаем канал с структурой dataForWorker и буфером %v", size)
-	resultCh := make(chan dataForWorker, size)
+func getFilledChan(inputCh <-chan DataForWorker, size int) <-chan DataForWorker {
+	log.Printf("Создаем канал с структурой DataForWorker и буфером %v", size)
+	resultCh := make(chan DataForWorker, size)
 	for i := 0; i < size; i++ {
 		job, ok := <-inputCh
 		log.Printf("Chan contains, %v", job)
@@ -99,7 +96,7 @@ func getFilledChan(inputCh <-chan dataForWorker, size int) <-chan dataForWorker 
 	return resultCh
 }
 
-func (h *Handler) worker(inputCh <-chan dataForWorker) {
+func (h *Handler) Worker(inputCh <-chan DataForWorker) {
 	log.Printf("Воркер запущен!")
 	for {
 		log.Printf("Получаем заполненный канал")
