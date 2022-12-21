@@ -44,9 +44,9 @@ func main() {
 		}
 	}
 
-	h := handlers.NewHandler(repository)
-
 	inputCh := make(chan handlers.DataForWorker, 100)
+	h := handlers.NewHandler(repository, inputCh)
+
 	go h.Worker(inputCh) // init go routine
 
 	r := chi.NewRouter()
