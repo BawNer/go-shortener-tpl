@@ -71,27 +71,54 @@ func putJobs(inputCh chan<- DataForWorker, urlIDs []string, signID uint32) {
 	}
 }
 
-func (h *Handler) Worker(inputCh <-chan DataForWorker) {
-	h.wg.Add(1)
-	for data := range inputCh {
-		err := h.storage.DeleteURL(data.ID, true, data.SignID)
-		if err != nil {
-			log.Printf("Произошла ошибка при отпрвке в бд  %v", err.Error())
+func getFilledChan(inputCh <-chan DataForWorker, size int) <-chan DataForWorker {
+	log.Printf("Создаем канал с структурой DataForWorker и буфером %v", size)
+	resultCh := make(chan DataForWorker, size)
+	for i := 0; i < size; i++ {
+		job, ok := <-inputCh
+		log.Printf("Chan contains, %v", job)
+		if !ok {
+			log.Printf("Произошла ОШИБКА при чтении данных из канала, выход из цикла")
+			break
 		}
-		h.wg.Done()
+		resultCh <- job
 	}
-	h.wg.Wait()
+	log.Printf("Закрываем канал")
+	close(resultCh)
+	log.Printf("Возвращаем последние данные %v", resultCh)
+	return resultCh
 }
 
-//func (h *Handler) writeToDB(ids []string, signID uint32) error {
-//	for _, id := range ids {
-//		log.Printf("url id to delete is %s", id)
-//		err := h.storage.DeleteURL(id, true, signID)
-//		if err != nil {
-//			log.Println(err)
-//			return err
-//		}
-//	}
-//
-//	return nil
-//}
+func (h *Handler) Worker(inputCh <-chan DataForWorker) {
+	log.Printf("Воркер запущен!")
+	for {
+		log.Printf("Получаем заполненный канал")
+		filledChan := getFilledChan(inputCh, 1)
+		log.Printf("генерируем батч")
+		batches := map[uint32][]string{}
+		log.Printf("Наполняем джобу")
+		for job := range filledChan {
+			batches[job.SignID] = append(batches[job.SignID], job.ID)
+		}
+		log.Printf("НОтправляем данные в БД!")
+		for signID, ids := range batches {
+			err := h.writeToDB(ids, signID)
+			if err != nil {
+				log.Printf("Произошла ошибка при отпрвке в бд  %v", err.Error())
+			}
+		}
+	}
+}
+
+func (h *Handler) writeToDB(ids []string, signID uint32) error {
+	for _, id := range ids {
+		log.Printf("url id to delete is %s", id)
+		err := h.storage.DeleteURL(id, true, signID)
+		if err != nil {
+			log.Println(err)
+			return err
+		}
+	}
+
+	return nil
+}
