@@ -46,6 +46,9 @@ func main() {
 
 	h := handlers.NewHandler(repository)
 
+	inputCh := make(chan handlers.DataForWorker, 100)
+	go h.Worker(inputCh) // init go routine
+
 	r := chi.NewRouter()
 
 	r.Use(middleware.RequestID)
@@ -66,8 +69,6 @@ func main() {
 	r.Delete("/api/user/urls", h.HandleDeleteBatchUrls)
 
 	log.Printf("Server started at %s", app.Config.ServerAddr)
-	inputCh := make(chan handlers.DataForWorker, 100)
-	go h.Worker(inputCh) // init go routine
 
 	// start server
 	err := http.ListenAndServe(app.Config.ServerAddr, r)

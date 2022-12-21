@@ -53,16 +53,9 @@ func (h *Handler) HandleDeleteBatchUrls(w http.ResponseWriter, r *http.Request) 
 	}
 
 	// main
-	log.Printf("reqID=%s Получаем размера буфера", reqID)
-	batchSize := 100
-	log.Printf("reqID=%s Буфер установлен на %d", reqID, batchSize)
-
-	log.Printf("reqID=%s Создаем канал с буфером %d", reqID, batchSize)
-	inputCh := make(chan DataForWorker, batchSize)
-	log.Printf("reqID=%s Канал с буфером %d создан!", reqID, batchSize)
 
 	log.Printf("reqID=%s Складируем в канал ID", reqID)
-	go putJobs(inputCh, urlIDs, signID)
+	go putJobs(h.inputCh, urlIDs, signID)
 
 	log.Printf("reqID=%s Отдаем ответ со статусом 202", reqID)
 	w.WriteHeader(http.StatusAccepted)
