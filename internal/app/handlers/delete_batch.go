@@ -71,36 +71,16 @@ func putJobs(inputCh chan<- DataForWorker, urlIDs []string, signID uint32) {
 	}
 }
 
-func getFilledChan(inputCh <-chan DataForWorker, size int) <-chan DataForWorker {
-	log.Printf("Создаем канал с структурой DataForWorker и буфером %v", size)
-	resultCh := make(chan DataForWorker, size)
-	for i := 0; i < size; i++ {
-		job, ok := <-inputCh
-		log.Printf("Chan contains, %v", job)
-		if !ok {
-			log.Printf("Произошла ОШИБКА при чтении данных из канала, выход из цикла")
-			break
-		}
-		resultCh <- job
-	}
-	log.Printf("Закрываем канал")
-	close(resultCh)
-	log.Printf("Возвращаем последние данные %v", resultCh)
-	return resultCh
-}
-
 func (h *Handler) Worker(inputCh <-chan DataForWorker) {
 	log.Printf("Воркер запущен!")
 	for {
-		log.Printf("Получаем заполненный канал")
-		filledChan := getFilledChan(inputCh, 1)
 		log.Printf("генерируем батч")
 		batches := map[uint32][]string{}
 		log.Printf("Наполняем джобу")
-		for job := range filledChan {
+		for job := range inputCh {
 			batches[job.SignID] = append(batches[job.SignID], job.ID)
 		}
-		log.Printf("НОтправляем данные в БД!")
+		log.Printf("Отправляем данные в БД!")
 		for signID, ids := range batches {
 			err := h.writeToDB(ids, signID)
 			if err != nil {
