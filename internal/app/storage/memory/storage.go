@@ -1,14 +1,17 @@
 package memory
 
 import (
+	"log"
 	"sync"
 
+	"github.com/BawNer/go-shortener-tpl/internal/app/handlers"
 	"github.com/BawNer/go-shortener-tpl/internal/app/storage"
 )
 
 type Memory struct {
-	mu      sync.RWMutex
-	storage map[string]*storage.LocalShortenData
+	mu         sync.RWMutex
+	storage    map[string]*storage.LocalShortenData
+	repository *storage.Repository
 }
 
 func New() (*Memory, error) {
@@ -95,4 +98,43 @@ func (m *Memory) DeleteURL(id string, val bool, signID uint32) error {
 	}
 	m.storage[id].IsDeleted = val
 	return nil
+}
+
+func (m *Memory) RunWorkers(count int) {
+	m.repository = storage.NewRepository()
+	for i := 0; i < count; i++ {
+		m.repository.WG.Add(1)
+		go func() {
+			for {
+				data, ok := <-m.repository.InputCh
+				if !ok {
+					log.Printf("Канал закрылся, завершаем работу")
+					m.repository.WG.Done()
+					return
+				}
+				log.Printf("Отправляем данные в БД!")
+				err := m.DeleteURL(data.ID, true, data.SignID)
+				if err != nil {
+					log.Printf("Проблема в бд, %v", err)
+				}
+			}
+		}()
+	}
+}
+
+func (m *Memory) Wait() {
+	m.repository.WG.Wait()
+}
+
+func (m *Memory) Stop() {
+	close(m.repository.InputCh)
+}
+
+func (m *Memory) PutJob(urlIDs []string, signID uint32) {
+	for _, urlID := range urlIDs {
+		m.repository.InputCh <- handlers.DataForWorker{
+			ID:     urlID,
+			SignID: signID,
+		}
+	}
 }
