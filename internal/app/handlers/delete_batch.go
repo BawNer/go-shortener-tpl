@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"sync"
 
 	"github.com/BawNer/go-shortener-tpl/internal/app"
 	"github.com/BawNer/go-shortener-tpl/internal/app/storage"
@@ -70,12 +71,14 @@ func putJobs(inputCh chan<- DataForWorker, urlIDs []string, signID uint32) {
 	}
 }
 
-func (h *Handler) Worker(inputCh <-chan DataForWorker) {
+func (h *Handler) Worker(inputCh <-chan DataForWorker, group *sync.WaitGroup) {
 	log.Printf("Воркер запущен!")
+	group.Add(1)
 	for {
 		data, ok := <-inputCh
 		if !ok {
-			log.Printf("Ошибка в воркере!")
+			log.Printf("Канал закрылся, завершаем работу")
+			group.Done()
 			return
 		}
 		log.Printf("Отправляем данные в БД!")

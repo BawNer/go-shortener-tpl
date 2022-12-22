@@ -1,9 +1,14 @@
 package main
 
 import (
+	"context"
 	"errors"
 	"log"
 	"net/http"
+	"os"
+	"os/signal"
+	"sync"
+	"syscall"
 
 	"github.com/BawNer/go-shortener-tpl/internal/app"
 	"github.com/BawNer/go-shortener-tpl/internal/app/handlers"
@@ -47,8 +52,9 @@ func main() {
 	inputCh := make(chan handlers.DataForWorker, 100)
 	h := handlers.NewHandler(repository, inputCh)
 
+	wg := sync.WaitGroup{}
 	for i := 0; i < app.Config.Workers; i++ {
-		go h.Worker(inputCh) // init go routine
+		go h.Worker(inputCh, &wg) // init go routine
 	}
 
 	r := chi.NewRouter()
@@ -72,11 +78,30 @@ func main() {
 
 	log.Printf("Server started at %s", app.Config.ServerAddr)
 
-	// start server
-	err := http.ListenAndServe(app.Config.ServerAddr, r)
+	server := &http.Server{Addr: app.Config.ServerAddr, Handler: r}
 
-	// handle err
-	if err != nil && !errors.Is(err, http.ErrServerClosed) {
-		log.Fatal(err)
+	// start server
+	go func() {
+		err := server.ListenAndServe()
+		if err != nil && !errors.Is(err, http.ErrServerClosed) {
+			log.Fatal(err)
+		}
+	}()
+
+	sigc := make(chan os.Signal, 1)
+	signal.Notify(sigc,
+		syscall.SIGHUP,
+		syscall.SIGINT,
+		syscall.SIGTERM,
+		syscall.SIGQUIT)
+	<-sigc
+
+	close(inputCh)
+	log.Printf("Channel has been closed")
+
+	wg.Wait()
+
+	if err := server.Shutdown(context.Background()); err != nil {
+		log.Fatalf("Сервер не смог закрыться без ошибок: %v", err)
 	}
 }
