@@ -2,6 +2,7 @@ package storage
 
 import (
 	"errors"
+	"sync"
 )
 
 var (
@@ -14,6 +15,14 @@ type LocalShortenData struct {
 	URL       string `json:"url"`
 	SignID    uint32 `json:"signID"`
 	IsDeleted bool   `json:"-"`
+
+	WG      sync.WaitGroup `json:"-"`
+	InputCh chan DataForWorker
+}
+
+type DataForWorker struct {
+	ID     string
+	SignID uint32
 }
 
 type Storage interface {
@@ -23,4 +32,8 @@ type Storage interface {
 	GetByField(field, val string) (*LocalShortenData, error)
 	DeleteURL(id string, val bool, signID uint32) error
 	Init() error
+	RunWorkers(count int)
+	AddJob(urlIDs []string, signID uint32)
+	Stop()
+	Wait()
 }

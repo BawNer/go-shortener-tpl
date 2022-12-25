@@ -4,17 +4,11 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
-	"sync"
 
 	"github.com/BawNer/go-shortener-tpl/internal/app"
 	"github.com/BawNer/go-shortener-tpl/internal/app/storage"
 	"github.com/google/uuid"
 )
-
-type DataForWorker struct {
-	ID     string
-	SignID uint32
-}
 
 func (h *Handler) HandleDeleteBatchUrls(w http.ResponseWriter, r *http.Request) {
 	var (
@@ -56,35 +50,7 @@ func (h *Handler) HandleDeleteBatchUrls(w http.ResponseWriter, r *http.Request) 
 	// main
 
 	log.Printf("reqID=%s Складируем в канал ID", reqID)
-	go putJobs(h.inputCh, urlIDs, signID)
+	h.storage.AddJob(urlIDs, signID)
 	log.Printf("reqID=%s Отдаем ответ со статусом 202", reqID)
 	w.WriteHeader(http.StatusAccepted)
-}
-
-func putJobs(inputCh chan<- DataForWorker, urlIDs []string, signID uint32) {
-	// складируем данные в канал
-	for _, urlID := range urlIDs {
-		inputCh <- DataForWorker{
-			ID:     urlID,
-			SignID: signID,
-		}
-	}
-}
-
-func (h *Handler) Worker(inputCh <-chan DataForWorker, group *sync.WaitGroup) {
-	log.Printf("Воркер запущен!")
-	group.Add(1)
-	for {
-		data, ok := <-inputCh
-		if !ok {
-			log.Printf("Канал закрылся, завершаем работу")
-			group.Done()
-			return
-		}
-		log.Printf("Отправляем данные в БД!")
-		err := h.storage.DeleteURL(data.ID, true, data.SignID)
-		if err != nil {
-			log.Printf("Проблема в бд, %v", err)
-		}
-	}
 }

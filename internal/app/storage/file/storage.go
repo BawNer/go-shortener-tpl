@@ -87,3 +87,19 @@ func (f *File) DeleteURL(id string, val bool, signID uint32) error {
 func (f *File) Close() error {
 	return f.file.Close()
 }
+
+func (f *File) RunWorkers(count int) {
+	f.memory.RunWorkers(count)
+}
+
+func (f *File) AddJob(urlIDs []string, signID uint32) {
+	f.memory.AddJob(urlIDs, signID)
+}
+
+func (f *File) Stop() {
+	f.memory.Stop()
+}
+
+func (f *File) Wait() {
+	f.memory.Wait()
+}

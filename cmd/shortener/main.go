@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
-	"sync"
 	"syscall"
 
 	"github.com/BawNer/go-shortener-tpl/internal/app"
@@ -37,6 +36,10 @@ func main() {
 			}
 		} else {
 			repository, errConfInit = memory.New()
+			err := repository.Init()
+			if err != nil {
+				log.Fatal(err.Error())
+			}
 			if errConfInit != nil {
 				log.Fatal(errConfInit.Error())
 			}
@@ -44,18 +47,16 @@ func main() {
 	} else {
 		var errConfInit error
 		repository, errConfInit = database.New()
+		err := repository.Init()
+		if err != nil {
+			log.Fatal(err.Error())
+		}
 		if errConfInit != nil {
 			log.Fatal(errConfInit.Error())
 		}
 	}
 
-	inputCh := make(chan handlers.DataForWorker, 100)
-	h := handlers.NewHandler(repository, inputCh)
-
-	wg := sync.WaitGroup{}
-	for i := 0; i < app.Config.Workers; i++ {
-		go h.Worker(inputCh, &wg) // init go routine
-	}
+	h := handlers.NewHandler(repository)
 
 	r := chi.NewRouter()
 
@@ -100,9 +101,9 @@ func main() {
 		log.Fatalf("Сервер не смог закрыться без ошибок: %v", err)
 	}
 
-	close(inputCh)
+	repository.Stop()
 	log.Printf("Channel has been closed")
 
-	wg.Wait()
+	repository.Wait()
 
 }
