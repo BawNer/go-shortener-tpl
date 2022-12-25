@@ -65,6 +65,7 @@ func TestMemStorage_ShortenerHandler(t *testing.T) {
 				repository, _ = file.New(app.Config.FileStoragePath)
 			}
 			repository, _ = memory.New()
+			repository.Init()
 			h := NewHandler(repository)
 
 			request := httptest.NewRequest(tt.args.method, tt.args.url, bytes.NewReader(dataBody))

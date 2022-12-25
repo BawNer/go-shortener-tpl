@@ -42,6 +42,7 @@ func TestMemStorage_HandlerRequest(t *testing.T) {
 				repository, _ = file.New(app.Config.FileStoragePath)
 			}
 			repository, _ = memory.New()
+			repository.Init()
 			h := NewHandler(repository)
 
 			w := httptest.NewRecorder()
