@@ -54,6 +54,8 @@ func main() {
 		if errConfInit != nil {
 			log.Fatal(errConfInit.Error())
 		}
+
+		repository.RunWorkers(app.Config.Workers)
 	}
 
 	h := handlers.NewHandler(repository)

@@ -8,7 +8,7 @@ import (
 
 type DB struct {
 	repository *PgDB
-	memory     *storage.LocalShortenData
+	memory     storage.LocalShortenData
 }
 
 func (d *DB) Init() error {
