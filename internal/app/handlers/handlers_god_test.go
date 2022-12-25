@@ -42,8 +42,7 @@ func TestMemStorage_HandlerRequest(t *testing.T) {
 				repository, _ = file.New(app.Config.FileStoragePath)
 			}
 			repository, _ = memory.New()
-			inputCh := make(chan DataForWorker, 100)
-			h := NewHandler(repository, inputCh)
+			h := NewHandler(repository)
 
 			w := httptest.NewRecorder()
 			s := chi.NewRouter()
