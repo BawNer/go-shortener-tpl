@@ -50,7 +50,12 @@ func (h *Handler) HandleDeleteBatchUrls(w http.ResponseWriter, r *http.Request) 
 	// main
 
 	log.Printf("reqID=%s Складируем в канал ID", reqID)
-	h.storage.AddJob(urlIDs, signID)
+	for _, urlID := range urlIDs {
+		err := h.worker.AddJob(urlID, signID)
+		if err != nil {
+			log.Printf("Error when set url to delete %v", err)
+		}
+	}
 	log.Printf("reqID=%s Отдаем ответ со статусом 202", reqID)
 	w.WriteHeader(http.StatusAccepted)
 }

@@ -15,6 +15,7 @@ import (
 	"github.com/BawNer/go-shortener-tpl/internal/app/storage/database"
 	"github.com/BawNer/go-shortener-tpl/internal/app/storage/file"
 	"github.com/BawNer/go-shortener-tpl/internal/app/storage/memory"
+	"github.com/BawNer/go-shortener-tpl/internal/app/workerpool"
 	"github.com/BawNer/go-shortener-tpl/internal/middlewares"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -28,20 +29,20 @@ func main() {
 		if app.Config.FileStoragePath != "" {
 			repository, errConfInit = file.New(app.Config.FileStoragePath)
 			if errConfInit != nil {
-				log.Fatal(errConfInit.Error())
+				log.Fatal(errConfInit)
 			}
 			err := repository.Init()
 			if err != nil {
-				log.Fatal(err.Error())
+				log.Fatal(err)
 			}
 		} else {
 			repository, errConfInit = memory.New()
 			if errConfInit != nil {
-				log.Fatal(errConfInit.Error())
+				log.Fatal(errConfInit)
 			}
 			err := repository.Init()
 			if err != nil {
-				log.Fatal(err.Error())
+				log.Fatal(err)
 			}
 		}
 	} else {
@@ -49,16 +50,17 @@ func main() {
 		repository, errConfInit = database.New()
 		err := repository.Init()
 		if err != nil {
-			log.Fatal(err.Error())
+			log.Fatal(err)
 		}
 		if errConfInit != nil {
-			log.Fatal(errConfInit.Error())
+			log.Fatal(errConfInit)
 		}
 	}
 
-	repository.RunWorkers(app.Config.Workers)
+	workers := workerpool.NewWorkerPool(repository)
+	workers.RunWorkers(app.Config.Workers)
 
-	h := handlers.NewHandler(repository)
+	h := handlers.NewHandler(repository, workers)
 
 	r := chi.NewRouter()
 
@@ -100,12 +102,9 @@ func main() {
 	<-sigc
 
 	if err := server.Shutdown(context.Background()); err != nil {
-		log.Fatalf("Сервер не смог закрыться без ошибок: %v", err)
+		log.Fatalf("Server shutdown with error: %v", err)
 	}
 
-	repository.Stop()
+	workers.Stop()
 	log.Printf("Channel has been closed")
-
-	repository.Wait()
-
 }

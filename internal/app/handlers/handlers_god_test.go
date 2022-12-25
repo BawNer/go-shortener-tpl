@@ -10,6 +10,7 @@ import (
 	"github.com/BawNer/go-shortener-tpl/internal/app/storage"
 	"github.com/BawNer/go-shortener-tpl/internal/app/storage/file"
 	"github.com/BawNer/go-shortener-tpl/internal/app/storage/memory"
+	"github.com/BawNer/go-shortener-tpl/internal/app/workerpool"
 	"github.com/go-chi/chi/v5"
 )
 
@@ -42,8 +43,10 @@ func TestMemStorage_HandlerRequest(t *testing.T) {
 				repository, _ = file.New(app.Config.FileStoragePath)
 			}
 			repository, _ = memory.New()
+			workers := workerpool.NewWorkerPool(repository)
+			workers.RunWorkers(3)
 			repository.Init()
-			h := NewHandler(repository)
+			h := NewHandler(repository, workers)
 
 			w := httptest.NewRecorder()
 			s := chi.NewRouter()

@@ -125,7 +125,7 @@ func (d *PgDB) DeleteURL(id string, value bool, signID uint32) error {
 	}
 	query.Close()
 	if query.Err() != nil {
-		log.Println(err)
+		log.Printf("Fail when url %s delete %v", id, err)
 		return query.Err()
 	}
 

@@ -28,7 +28,7 @@ func NewConfigApp() *ConfigApp {
 		defaultFileStoragePath = ""
 		defaultSecret          = "u-nya-nya-mo-ni-ni"
 		defaultDB              = ""
-		defaultWorkers         = 3
+		defaultWorkersCount    = 3
 	)
 
 	// dbConn = postgresql://postgres:Ewelli55dxx@localhost:5432/shortener
@@ -75,7 +75,7 @@ func NewConfigApp() *ConfigApp {
 		FileStoragePath: fileStoragePath,
 		Secret:          secret,
 		DSN:             dsn,
-		Workers:         defaultWorkers,
+		Workers:         defaultWorkersCount,
 	}
 }
 
