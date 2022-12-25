@@ -16,8 +16,8 @@ type LocalShortenData struct {
 	SignID    uint32 `json:"signID"`
 	IsDeleted bool   `json:"-"`
 
-	WG      sync.WaitGroup `json:"-"`
-	InputCh chan DataForWorker
+	WG      sync.WaitGroup     `json:"-"`
+	InputCh chan DataForWorker `json:"-"`
 }
 
 type DataForWorker struct {
