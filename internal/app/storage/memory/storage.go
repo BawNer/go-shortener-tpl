@@ -10,7 +10,7 @@ import (
 type Memory struct {
 	mu         sync.RWMutex
 	storage    map[string]*storage.LocalShortenData
-	repository storage.LocalShortenData
+	repository storage.Repository
 }
 
 func New() (*Memory, error) {

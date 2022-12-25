@@ -15,14 +15,16 @@ type LocalShortenData struct {
 	URL       string `json:"url"`
 	SignID    uint32 `json:"signID"`
 	IsDeleted bool   `json:"-"`
-
-	WG      sync.WaitGroup     `json:"-"`
-	InputCh chan DataForWorker `json:"-"`
 }
 
 type DataForWorker struct {
 	ID     string
 	SignID uint32
+}
+
+type Repository struct {
+	WG      sync.WaitGroup
+	InputCh chan DataForWorker
 }
 
 type Storage interface {
