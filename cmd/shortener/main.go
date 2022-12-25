@@ -36,12 +36,12 @@ func main() {
 			}
 		} else {
 			repository, errConfInit = memory.New()
+			if errConfInit != nil {
+				log.Fatal(errConfInit.Error())
+			}
 			err := repository.Init()
 			if err != nil {
 				log.Fatal(err.Error())
-			}
-			if errConfInit != nil {
-				log.Fatal(errConfInit.Error())
 			}
 		}
 	} else {
@@ -54,9 +54,9 @@ func main() {
 		if errConfInit != nil {
 			log.Fatal(errConfInit.Error())
 		}
-
-		repository.RunWorkers(app.Config.Workers)
 	}
+
+	repository.RunWorkers(app.Config.Workers)
 
 	h := handlers.NewHandler(repository)
 
