@@ -44,7 +44,7 @@ func TestMemStorage_HandlerRequest(t *testing.T) {
 			}
 			repository, _ = memory.New()
 			workers := workers.NewWorkerPool(repository)
-			workers.RunWorkers(3)
+			workers.RunWorkers(app.Config.WorkersCount)
 			repository.Init()
 			h := NewHandler(repository, workers)
 

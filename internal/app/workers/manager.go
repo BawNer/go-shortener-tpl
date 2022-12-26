@@ -37,8 +37,8 @@ func (w *WorkerPool) AddJob(id string, signID uint32) error {
 	}
 }
 
-func (w *WorkerPool) RunWorkers(countWorkers int) {
-	for i := 0; i < countWorkers; i++ {
+func (w *WorkerPool) RunWorkers(workersCount int) {
+	for i := 0; i < workersCount; i++ {
 		w.wg.Add(1)
 		go func() {
 			defer w.wg.Done()
