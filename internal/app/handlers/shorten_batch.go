@@ -48,7 +48,7 @@ func (h *Handler) ShortenBatch(w http.ResponseWriter, r *http.Request) {
 				Name:   "sign",
 				Value:  newSign,
 				Path:   "/",
-				MaxAge: 360,
+				MaxAge: 3600,
 			}
 			http.SetCookie(w, cookie)
 			signID, _ = storage.DecodeSign(newSign)
@@ -63,9 +63,10 @@ func (h *Handler) ShortenBatch(w http.ResponseWriter, r *http.Request) {
 		}
 
 		evt := storage.LocalShortenData{
-			ID:     shortURL,
-			URL:    item.OriginalURL,
-			SignID: signID,
+			ID:        shortURL,
+			URL:       item.OriginalURL,
+			SignID:    signID,
+			IsDeleted: false,
 		}
 
 		err := h.storage.SaveURL(

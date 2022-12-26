@@ -14,6 +14,7 @@ type ConfigApp struct {
 	FileStoragePath string
 	Secret          string
 	DSN             string
+	WorkersCount    int
 }
 
 func NewConfigApp() *ConfigApp {
@@ -27,6 +28,7 @@ func NewConfigApp() *ConfigApp {
 		defaultFileStoragePath = ""
 		defaultSecret          = "u-nya-nya-mo-ni-ni"
 		defaultDB              = ""
+		defaultWorkersCount    = 3
 	)
 
 	// dbConn = postgresql://postgres:Ewelli55dxx@localhost:5432/shortener
@@ -73,6 +75,7 @@ func NewConfigApp() *ConfigApp {
 		FileStoragePath: fileStoragePath,
 		Secret:          secret,
 		DSN:             dsn,
+		WorkersCount:    defaultWorkersCount,
 	}
 }
 

@@ -36,3 +36,7 @@ func (d *DB) GetAllURLsForSignID(signID uint32) ([]*storage.LocalShortenData, er
 func (d *DB) GetByField(field, val string) (*storage.LocalShortenData, error) {
 	return d.repository.SelectByField(field, val)
 }
+
+func (d *DB) DeleteURL(id string, val bool, signID uint32) error {
+	return d.repository.DeleteURL(id, val, signID)
+}

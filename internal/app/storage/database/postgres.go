@@ -3,6 +3,7 @@ package database
 import (
 	"context"
 	"fmt"
+	"log"
 	"os"
 
 	"github.com/BawNer/go-shortener-tpl/internal/app"
@@ -22,7 +23,8 @@ func NewConn() (*PgDB, error) {
 	}
 	// create table
 	query, err := db.Query(context.Background(),
-		"CREATE TABLE IF NOT EXISTS shortened_urls (id varchar(20), url varchar(255)  PRIMARY KEY, signID bigint NOT NULL)",
+		"CREATE TABLE IF NOT EXISTS shortened_urls (id varchar(20), url varchar(255)  PRIMARY KEY,"+
+			" signID bigint NOT NULL, isDeleted BOOLEAN NOT NULL DEFAULT FALSE)",
 	)
 	if err != nil {
 		return &PgDB{}, err
@@ -33,16 +35,23 @@ func NewConn() (*PgDB, error) {
 }
 
 func (d *PgDB) Insert(params *storage.LocalShortenData) error {
+	log.Printf("Отправляем данные в бд %v", params)
 	query, err := d.pool.Query(context.Background(),
-		"INSERT INTO shortened_urls (id, url, signID) VALUES ($1, $2, $3)", params.ID, params.URL, params.SignID)
+		"INSERT INTO shortened_urls (id, url, signID, isDeleted) VALUES ($1, $2, $3, $4)", params.ID, params.URL, params.SignID, params.IsDeleted)
 	if err != nil {
+		log.Println(err)
 		return err
 	}
+	log.Printf("Данные отпавлены в бд %v", params)
+
+	log.Println("Закрываем запрос")
 	query.Close()
 	if query.Err() != nil {
+		log.Println(err)
 		// строка уже существует, необходимо вернуть ошибку и уже существующую строку
 		return query.Err()
 	}
+	log.Println("Соединение закрыто!")
 	return nil
 }
 
@@ -50,7 +59,7 @@ func (d *PgDB) SelectByID(id string) (*storage.LocalShortenData, error) {
 	var (
 		data storage.LocalShortenData
 	)
-	err := d.pool.QueryRow(context.Background(), "SELECT * FROM shortened_urls WHERE id=$1", id).Scan(&data.ID, &data.URL, &data.SignID)
+	err := d.pool.QueryRow(context.Background(), "SELECT * FROM shortened_urls WHERE id=$1", id).Scan(&data.ID, &data.URL, &data.SignID, &data.IsDeleted)
 	if err != nil {
 		return nil, err
 	}
@@ -64,12 +73,12 @@ func (d *PgDB) SelectByField(field string, val string) (*storage.LocalShortenDat
 	)
 	switch field {
 	case "url":
-		err := d.pool.QueryRow(context.Background(), "SELECT * FROM shortened_urls WHERE url=$1", val).Scan(&data.ID, &data.URL, &data.SignID)
+		err := d.pool.QueryRow(context.Background(), "SELECT * FROM shortened_urls WHERE url=$1", val).Scan(&data.ID, &data.URL, &data.SignID, &data.IsDeleted)
 		if err != nil {
 			return nil, err
 		}
 	case "id":
-		err := d.pool.QueryRow(context.Background(), "SELECT * FROM shortened_urls WHERE id=$1", val).Scan(&data.ID, &data.URL, &data.SignID)
+		err := d.pool.QueryRow(context.Background(), "SELECT * FROM shortened_urls WHERE id=$1", val).Scan(&data.ID, &data.URL, &data.SignID, &data.IsDeleted)
 		if err != nil {
 			return nil, err
 		}
@@ -97,11 +106,28 @@ func (d *PgDB) SelectBySignID(signID uint32) ([]*storage.LocalShortenData, error
 		}
 
 		data = append(data, &storage.LocalShortenData{
-			ID:     value[0].(string),
-			URL:    value[1].(string),
-			SignID: uint32(value[2].(int64)),
+			ID:        value[0].(string),
+			URL:       value[1].(string),
+			SignID:    uint32(value[2].(int64)),
+			IsDeleted: value[3].(bool),
 		})
 	}
 
 	return data, nil
+}
+
+func (d *PgDB) DeleteURL(id string, value bool, signID uint32) error {
+	query, err := d.pool.Query(context.Background(), "UPDATE shortened_urls SET isDeleted=$1 WHERE id = $2 AND signID = $3",
+		value, id, signID)
+	if err != nil {
+		log.Printf("failed when make query to update table %v", err)
+		return err
+	}
+	query.Close()
+	if query.Err() != nil {
+		log.Printf("failed to delete url %q: %s", id, err)
+		return query.Err()
+	}
+
+	return nil
 }

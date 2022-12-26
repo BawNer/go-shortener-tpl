@@ -81,3 +81,18 @@ func (m *Memory) GetAllURLsForSignID(signID uint32) ([]*storage.LocalShortenData
 
 	return urls, nil
 }
+
+func (m *Memory) DeleteURL(id string, val bool, signID uint32) error {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	v, ok := m.storage[id]
+	if !ok {
+		return storage.ErrNotFound
+	}
+
+	if v.SignID != signID {
+		return storage.ErrNotAccepted
+	}
+	m.storage[id].IsDeleted = val
+	return nil
+}
