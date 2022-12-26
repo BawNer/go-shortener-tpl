@@ -1,8 +1,7 @@
-package workerpool
+package workers
 
 import (
 	"errors"
-	"fmt"
 	"log"
 	"sync"
 
@@ -10,12 +9,13 @@ import (
 )
 
 var (
-	ErrRepositoryIsClosing = errors.New("workers chain are closed")
+	ErrShuttingDown = errors.New("workers chain are closed")
 )
 
 type WorkerPool struct {
 	wg      sync.WaitGroup
-	down    chan struct{}
+	once    sync.Once
+	stop    chan struct{}
 	inputCh chan DataForWorker
 	storage storage.Storage
 }
@@ -27,8 +27,8 @@ type DataForWorker struct {
 
 func (w *WorkerPool) AddJob(id string, signID uint32) error {
 	select {
-	case <-w.down:
-		return ErrRepositoryIsClosing
+	case <-w.stop:
+		return ErrShuttingDown
 	case w.inputCh <- DataForWorker{
 		ID:     id,
 		SignID: signID,
@@ -44,8 +44,8 @@ func (w *WorkerPool) RunWorkers(countWorkers int) {
 			defer w.wg.Done()
 			for {
 				select {
-				case <-w.down:
-					fmt.Println("Exiting")
+				case <-w.stop:
+					log.Println("Exiting")
 					return
 				case v, ok := <-w.inputCh:
 					if !ok {
@@ -63,20 +63,17 @@ func (w *WorkerPool) RunWorkers(countWorkers int) {
 }
 
 func (w *WorkerPool) Stop() {
-	once := sync.Once{}
-
-	once.Do(func() {
-		close(w.down)
+	w.once.Do(func() {
+		close(w.stop)
 		close(w.inputCh)
 	})
-
 	w.wg.Wait()
 }
 
 func NewWorkerPool(repository storage.Storage) *WorkerPool {
 	return &WorkerPool{
 		wg:      sync.WaitGroup{},
-		down:    make(chan struct{}),
+		stop:    make(chan struct{}),
 		inputCh: make(chan DataForWorker, 100),
 		storage: repository,
 	}

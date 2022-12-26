@@ -15,7 +15,7 @@ import (
 	"github.com/BawNer/go-shortener-tpl/internal/app/storage/database"
 	"github.com/BawNer/go-shortener-tpl/internal/app/storage/file"
 	"github.com/BawNer/go-shortener-tpl/internal/app/storage/memory"
-	"github.com/BawNer/go-shortener-tpl/internal/app/workerpool"
+	"github.com/BawNer/go-shortener-tpl/internal/app/workers"
 	"github.com/BawNer/go-shortener-tpl/internal/middlewares"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -57,10 +57,10 @@ func main() {
 		}
 	}
 
-	workers := workerpool.NewWorkerPool(repository)
-	workers.RunWorkers(app.Config.Workers)
+	worker := workers.NewWorkerPool(repository)
+	worker.RunWorkers(app.Config.WorkersCount)
 
-	h := handlers.NewHandler(repository, workers)
+	h := handlers.NewHandler(repository, worker)
 
 	r := chi.NewRouter()
 
@@ -105,6 +105,7 @@ func main() {
 		log.Fatalf("Server shutdown with error: %v", err)
 	}
 
-	workers.Stop()
+	worker.Stop()
+
 	log.Printf("Channel has been closed")
 }

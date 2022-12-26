@@ -120,12 +120,12 @@ func (d *PgDB) DeleteURL(id string, value bool, signID uint32) error {
 	query, err := d.pool.Query(context.Background(), "UPDATE shortened_urls SET isDeleted=$1 WHERE id = $2 AND signID = $3",
 		value, id, signID)
 	if err != nil {
-		log.Println(err)
+		log.Printf("failed when make query to update table %v", err)
 		return err
 	}
 	query.Close()
 	if query.Err() != nil {
-		log.Printf("Fail when url %s delete %v", id, err)
+		log.Printf("failed to delete url %q: %s", id, err)
 		return query.Err()
 	}
 

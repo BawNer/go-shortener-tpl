@@ -14,7 +14,7 @@ type ConfigApp struct {
 	FileStoragePath string
 	Secret          string
 	DSN             string
-	Workers         int
+	WorkersCount    int
 }
 
 func NewConfigApp() *ConfigApp {
@@ -75,7 +75,7 @@ func NewConfigApp() *ConfigApp {
 		FileStoragePath: fileStoragePath,
 		Secret:          secret,
 		DSN:             dsn,
-		Workers:         defaultWorkersCount,
+		WorkersCount:    defaultWorkersCount,
 	}
 }
 
